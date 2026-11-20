@@ -436,14 +436,14 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.6.0';
+const VERSION = '3.6.1';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
 const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-const SUGGEST = ['Um 6 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt aus dem Haus','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Kein Alkohol','Kein Porno','Clean geblieben','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
+const SUGGEST = ['Um 6 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt aus dem Haus','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Kein Alkohol','Selbstkontrolle','Clean geblieben','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
 const QUOTES = [
   'Disziplin schlägt Motivation. Jeden Tag.',
   'Während sie schlafen, arbeitest du.',
@@ -466,7 +466,10 @@ const QUOTES = [
 let state = load();
 function normalize(s){
   if(!s || !Array.isArray(s.habits)) return null;
-  const ren = n => n === 'Vor 7 Uhr aufstehen' ? 'Um 6 Uhr aufstehen' : n === 'Vor 7 Uhr aufstehen.' ? 'Um 6 Uhr aufstehen.' : n;
+  const REN = { 'Vor 7 Uhr aufstehen':'Um 6 Uhr aufstehen', 'Vor 7 Uhr aufstehen.':'Um 6 Uhr aufstehen.', 'Kein Porno':'Selbstkontrolle', 'Kein Porno, kein Wichsen':'Selbstkontrolle', 'Frei von Pornos':'Selbstkontrolle' };
+  const ren = n => REN[n] || n;
+  if(Array.isArray(s.counters)) s.counters = s.counters.map(c => c && c.name ? Object.assign({}, c, { name:ren(c.name) }) : c);
+  if(Array.isArray(s.goals)) s.goals = s.goals.map(g => g && g.title ? Object.assign({}, g, { title:ren(g.title), steps:Array.isArray(g.steps) ? g.steps.map(x => x && /^Pornoseiten sperren/.test(x.text) ? Object.assign({}, x, { text:x.text.replace(/^Pornoseiten sperren/, 'Websites für Erwachsene sperren') }) : x) : g.steps }) : g);
   s.habits = s.habits.map(h => h && h.name ? Object.assign({}, h, { name:ren(h.name) }) : h);
   if(Array.isArray(s.rules)) s.rules = s.rules.map(ren);
   return { arc:s.arc || null, badges:Array.isArray(s.badges) ? s.badges : null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false,
@@ -797,7 +800,7 @@ function renderToday(){
   const hs = activeHabits();
   const t = today(), k = dkey(viewDay), isToday = k === dkey(t);
   const label = isToday ? 'Heute' : (k === dkey(addDays(t,-1)) ? 'Gestern' : longDate(viewDay));
-  let html = (isToday ? storageWarnHtml() + '<button class="sos-big" data-act="sos"><span>Drang?</span>Notfallplan</button>' : '') + arcCardHtml(true);
+  let html = (isToday ? storageWarnHtml() + '<button class="sos-big" data-act="sos">Notfallplan</button>' : '') + arcCardHtml(true);
   html += '<div class="daynav"><button class="icon-btn" data-act="prev" aria-label="Vorheriger Tag">' + ARROW_L + '</button>'
     + '<div class="lbl"><b>' + label + '</b><span>' + (isToday ? longDate(viewDay) : 'Nachtragen') + '</span></div>'
     + '<button class="icon-btn" data-act="next" aria-label="Nächster Tag"' + (isToday ? ' disabled' : '') + '>' + ARROW_R + '</button></div>';
@@ -1097,9 +1100,9 @@ const GOAL_TEMPLATES = [
   { title:'Mein Leben in Ordnung bringen', why:'Kein Chaos mehr. Ich habe alles im Griff.',
     steps:['Zimmer oder Wohnung komplett ausmisten','Alle offenen Briefe und Rechnungen erledigen','Wichtige Termine machen (Arzt, Amt …)','Feste Schlafenszeit festlegen','Alles Offene aufschreiben – und abarbeiten'],
     habits:[['Bett machen',null],['Aufgaben-Liste abarbeiten',null],['Kein Handy nach 22 Uhr',null]] },
-  { title:'Frei von Pornos', why:'Ich will meine Energie, meinen Fokus und mein Selbstvertrauen zurück – für das echte Leben und eine echte Frau.',
-    steps:['Pornoseiten sperren: Einstellungen → Bildschirmzeit → Inhalte & Datenschutz → Store-, Web-, Siri-Inhalte → Webinhalte → „Websites für Erwachsene begrenzen“','Bildschirmzeit-Code von einem Freund setzen lassen','Handy nachts nicht mehr im Schlafzimmer laden','Accounts entfolgen, die dich triggern','Aufschreiben: Wann, wo und warum kommt der Drang?','7 Tage clean','30 Tage clean','90 Tage clean'],
-    habits:[['Clean geblieben',null],['Kalt duschen',null],['Kein Handy nach 22 Uhr',null]], counter:'Kein Porno, kein Wichsen' },
+  { title:'Selbstkontrolle', why:'Ich will meine Energie, meinen Fokus und mein Selbstvertrauen zurück – für das echte Leben und eine echte Frau.',
+    steps:['Websites für Erwachsene sperren: Einstellungen → Bildschirmzeit → Inhalte & Datenschutz → Store-, Web-, Siri-Inhalte → Webinhalte → „Websites für Erwachsene begrenzen“','Bildschirmzeit-Code von einem Freund setzen lassen','Handy nachts nicht mehr im Schlafzimmer laden','Accounts entfolgen, die dich triggern','Aufschreiben: Wann, wo und warum kommt der Drang?','7 Tage clean','30 Tage clean','90 Tage clean'],
+    habits:[['Clean geblieben',null],['Kalt duschen',null],['Kein Handy nach 22 Uhr',null]], counter:'Selbstkontrolle' },
   { title:'Mehr Geld auf dem Konto', why:'Ich will Rücklagen statt Sorgen.',
     steps:['Alle Ausgaben eines Monats aufschreiben','Unnötige Abos kündigen','Sparziel festlegen','Dauerauftrag aufs Sparkonto einrichten'],
     habits:[['Kein unnötiger Kauf',null]] }
@@ -1185,7 +1188,7 @@ function goalSave(){
 
 /* ---------- Clean-Zähler ---------- */
 const MILESTONES = [1,3,7,14,21,30,45,60,90,120,180,365];
-const COUNTER_PRESETS = ['Kein Porno, kein Wichsen','Kein Alkohol','Kein Zocken','Kein Social Media','Nicht rauchen'];
+const COUNTER_PRESETS = ['Selbstkontrolle','Kein Alkohol','Kein Zocken','Kein Social Media','Nicht rauchen'];
 const cDays = c => Math.max(0, daysBetween(fromKey(c.start), today()));
 function countersHtml(){
   return state.counters.map(c => {
@@ -1200,7 +1203,7 @@ function countersHtml(){
 function counterNew(){
   openSheet('<h3>Clean-Zähler</h3><p class="note" style="margin:0 0 14px">Zählt jeden Tag, an dem du durchhältst. Bei einem Rückfall fängst du neu an – dein Rekord bleibt.</p>'
     + '<div class="field"><label>Wovon willst du loskommen?</label><div class="chips" id="c-pre">' + COUNTER_PRESETS.filter(n => !state.counters.some(c => c.name === n)).map(n => '<button data-n="' + esc(n) + '">' + esc(n) + '</button>').join('') + '</div></div>'
-    + '<div class="field"><label for="c-name">Name</label><input id="c-name" type="text" maxlength="60" placeholder="z. B. Kein Porno, kein Wichsen"></div>'
+    + '<div class="field"><label for="c-name">Name</label><input id="c-name" type="text" maxlength="60" placeholder="z. B. Selbstkontrolle"></div>'
     + '<div class="field"><label for="c-start">Clean seit</label><input id="c-start" type="date" value="' + dkey(today()) + '" max="' + dkey(today()) + '"></div>'
     + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="counter-save">Starten</button></div>');
   $('#c-pre').onclick = e => { const b = e.target.closest('button'); if(!b) return; $('#c-name').value = b.dataset.n; document.querySelectorAll('#c-pre button').forEach(x => x.classList.toggle('on', x === b)); };
@@ -1214,7 +1217,7 @@ function counterSave(){
 }
 function sos(id){
   const c = state.counters.find(x => x.id === id) || state.counters[0] || null;
-  const g = state.goals.find(x => x.title === 'Frei von Pornos' && !x.done);
+  const g = state.goals.find(x => (x.title === 'Selbstkontrolle' || x.title === 'Frei von Pornos') && !x.done);
   openSheet('<h3>Nicht jetzt.</h3><p>Der Drang ist wie eine Welle: Nach 10 bis 15 Minuten ist er vorbei. Du musst nur diese Minuten gewinnen.</p>'
     + '<ol class="sos"><li><b>Steh sofort auf</b> und geh in einen anderen Raum. Tür auf, Licht an.</li>'
     + '<li><b>Handy weg</b> – in ein anderes Zimmer oder ausschalten.</li>'
@@ -1315,10 +1318,10 @@ function checkinOpen(){
   drawCheckin();
 }
 function drawCheckin(){
-  openSheet('<h3>Abend-Check</h3>'
+  openSheet('<h3>Abend-Check</h3><p class="note" style="margin:-6px 0 14px">30 Sekunden, jeden Abend. Nach ein paar Wochen zeigt dir „Mein Arc“, wie deine Tage laufen und wann du schwach wirst – damit du genau da vorsorgen kannst.</p>'
     + '<div class="field"><label>Wie war dein Tag?</label><div class="seg moodsel" id="ck-mood">' + MOODS.map((m, i) => '<button data-v="' + (i + 1) + '" class="' + (ck.mood === i + 1 ? 'on' : '') + '">' + m + '</button>').join('') + '</div></div>'
     + '<div class="field"><label for="ck-good">Was lief heute gut?</label><input id="ck-good" type="text" maxlength="140" value="' + esc(ck.good) + '" placeholder="Ein Satz reicht."></div>'
-    + '<div class="field"><label>Drang heute?</label><div class="seg" id="ck-urge">' + [['none','Nein'],['strong','Ja – stark geblieben'],['relapse','Rückfall']].map(([v, l]) => '<button data-v="' + v + '" class="' + (ck.urge === v ? 'on' : '') + '">' + l + '</button>').join('') + '</div></div>'
+    + '<div class="field"><label>Schwacher Moment heute?</label><div class="seg" id="ck-urge">' + [['none','Nein'],['strong','Ja – aber stark geblieben'],['relapse','Rückfall']].map(([v, l]) => '<button data-v="' + v + '" class="' + (ck.urge === v ? 'on' : '') + '">' + l + '</button>').join('') + '</div></div>'
     + (ck.urge !== 'none' ? '<div class="field"><label>Wann oder wobei?</label><div class="chips" id="ck-trig">' + TRIGGERS.map(t => '<button data-t="' + t + '" class="' + (ck.trig.includes(t) ? 'on' : '') + '">' + t + '</button>').join('') + '</div></div>' : '')
     + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="checkin-save">Speichern</button></div>');
   $('#ck-good').oninput = e => ck.good = e.target.value;
@@ -1603,7 +1606,7 @@ function whatsNew(){
     + '<li><b>Abzeichen und Ränge:</b> für perfekte Tage und für jeden Clean-Zähler – von „Erster Schritt“ bis „Tausend“ und darüber hinaus. Zu sehen unter „Mein Arc“.</li>'
     + '<li><b>Um 6 Uhr aufstehen</b> statt vor 7. „Neu beginnen“ fragt jetzt zweimal nach.</li>'
     + '<li><b>Sicher speichern:</b> alles wird jetzt doppelt gespeichert, dazu jeden Tag eine Kopie. Sicherung direkt in iCloud. „✓ Gespeichert“ steht unten auf jeder Seite.</li>'
-    + '<li><b>Clean-Zähler:</b> zählt deine Tage ohne Porno (oder Alkohol, Zocken …), mit Rekord und Notfallplan, wenn der Drang kommt. Neue Ziel-Vorlage „Frei von Pornos“.</li>'
+    + '<li><b>Clean-Zähler:</b> zählt deine Tage in Selbstkontrolle (oder ohne Alkohol, Zocken …), mit Rekord und Notfallplan. Neue Ziel-Vorlage „Selbstkontrolle“.</li>'
     + '<li><b>Ziele:</b> eigenes Ziel mit Warum und Schritten – mit Vorlagen wie „Eine Freundin finden“.</li>'
     + '<li><b>Aufgaben:</b> alles, was du erledigen musst, unter „Heute“. Offenes bleibt stehen, bis es erledigt ist.</li>'
     + '<li><b>Meine Regeln:</b> deine Winter-Arc-Regeln, oder die 10 Regeln übernehmen.</li>'

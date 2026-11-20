@@ -396,6 +396,10 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 .code-box{ font-family:'JetBrains Mono', ui-monospace, Menlo, monospace; font-size:17px; letter-spacing:.06em; text-align:center; padding:16px 10px; margin:14px 0;
   border:1px solid rgba(224,53,45,.55); border-radius:var(--r); background:#050506; user-select:all; -webkit-user-select:all; word-break:break-all; }
 .mut .undo{ margin-left:8px; color:#fff; text-decoration:underline; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.sos-big{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin:0 0 14px; padding:16px; border-radius:var(--r);
+  background:var(--red); color:#fff; font-size:14px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; box-shadow:0 0 26px var(--red-glow); }
+.sos-big span{ font-family:var(--serif); font-size:24px; font-weight:600; letter-spacing:.04em; text-transform:none; }
+.sos-big:active{ transform:scale(.98); }
 </style>
 </head>
 <body>
@@ -432,7 +436,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.5.1';
+const VERSION = '3.6.0';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
@@ -793,7 +797,7 @@ function renderToday(){
   const hs = activeHabits();
   const t = today(), k = dkey(viewDay), isToday = k === dkey(t);
   const label = isToday ? 'Heute' : (k === dkey(addDays(t,-1)) ? 'Gestern' : longDate(viewDay));
-  let html = (isToday ? storageWarnHtml() : '') + arcCardHtml(true);
+  let html = (isToday ? storageWarnHtml() + '<button class="sos-big" data-act="sos"><span>Drang?</span>Notfallplan</button>' : '') + arcCardHtml(true);
   html += '<div class="daynav"><button class="icon-btn" data-act="prev" aria-label="Vorheriger Tag">' + ARROW_L + '</button>'
     + '<div class="lbl"><b>' + label + '</b><span>' + (isToday ? longDate(viewDay) : 'Nachtragen') + '</span></div>'
     + '<button class="icon-btn" data-act="next" aria-label="Nächster Tag"' + (isToday ? ' disabled' : '') + '>' + ARROW_R + '</button></div>';
@@ -1190,7 +1194,7 @@ function countersHtml(){
       + '<div class="n">' + roman(n) + ' <small>' + (n === 1 ? 'Tag' : 'Tage') + ' · ' + n + '</small></div>'
       + '<div class="sub">Rekord ' + best + ' ' + (best === 1 ? 'Tag' : 'Tage') + ' · nächstes Abzeichen „' + esc(ba.next[1]) + '“ bei ' + next + (next === 1 ? ' Tag' : ' Tagen') + '</div>'
       + '<div class="bar"><b style="width:' + Math.round((n - prev) / (next - prev) * 100) + '%"></b></div>'
-      + '<div class="row-btns"><button class="btn" data-act="sos" data-id="' + c.id + '">Drang? Notfallplan</button><button class="btn ghost" data-act="relapse" data-id="' + c.id + '">Rückfall</button></div></div>';
+      + '<div class="row-btns"><button class="btn ghost" data-act="relapse" data-id="' + c.id + '">Rückfall</button></div></div>';
   }).join('');
 }
 function counterNew(){
@@ -1209,7 +1213,7 @@ function counterSave(){
   save(); closeSheet(); tab = 'today'; render(); toast('Zähler läuft. Tag für Tag.');
 }
 function sos(id){
-  const c = state.counters.find(x => x.id === id); if(!c) return;
+  const c = state.counters.find(x => x.id === id) || state.counters[0] || null;
   const g = state.goals.find(x => x.title === 'Frei von Pornos' && !x.done);
   openSheet('<h3>Nicht jetzt.</h3><p>Der Drang ist wie eine Welle: Nach 10 bis 15 Minuten ist er vorbei. Du musst nur diese Minuten gewinnen.</p>'
     + '<ol class="sos"><li><b>Steh sofort auf</b> und geh in einen anderen Raum. Tür auf, Licht an.</li>'
@@ -1219,14 +1223,14 @@ function sos(id){
     + '<li><b>Raus.</b> 10 Minuten spazieren, egal wie kalt.</li>'
     + '<li><b>Schreib jemandem</b> oder ruf einen Freund an.</li></ol>'
     + (g && g.why ? '<p class="quote" style="margin:16px 0 0;font-size:20px">„' + esc(g.why) + '“</p>' : '')
-    + '<p class="note" style="text-align:center;margin:14px 0 0">' + cDays(c) + (cDays(c) === 1 ? ' Tag' : ' Tage') + ' clean. Wirf das nicht weg.</p>'
-    + '<div class="row-btns" style="margin-top:16px"><button class="btn red" data-act="sos-start" data-id="' + c.id + '">10 Minuten durchhalten – Start</button></div>'
+    + (c ? '<p class="note" style="text-align:center;margin:14px 0 0">' + cDays(c) + (cDays(c) === 1 ? ' Tag' : ' Tage') + ' clean. Wirf das nicht weg.</p>' : '')
+    + '<div class="row-btns" style="margin-top:16px"><button class="btn red" data-act="sos-start" data-id="' + (c ? c.id : '') + '">10 Minuten durchhalten – Start</button></div>'
     + '<div class="small-btns"><button class="btn ghost" data-act="cancel">Schon vorbei</button></div>');
 }
 const SOS_STEPS = ['Steh auf. Geh in einen anderen Raum. Licht an.','Leg das Handy weg – anderes Zimmer.','20 Liegestütze. Jetzt.','Kaltes Wasser ins Gesicht oder kalt duschen.','Zieh dich an und geh raus. Einmal um den Block.','Schreib einem Kumpel oder ruf jemanden an.','Atme: 4 Sekunden ein, 4 halten, 6 aus. Zehnmal.','50 Kniebeugen.'];
 let sosTimer = null, sosEnd = 0, sosStep = 0, sosCounter = null;
 function sosStart(id){
-  sosCounter = id; sosEnd = Date.now() + 10*60*1000; sosStep = 0;
+  sosCounter = id || null; sosEnd = Date.now() + 10*60*1000; sosStep = 0;
   openSheet('<div style="text-align:center"><div class="kick">Der Drang verliert</div><div class="sos-clock" id="sos-clock">10:00</div>'
     + '<div class="sos-step" id="sos-step"></div><div class="row-btns"><button class="btn ghost" data-act="sos-next">Erledigt – nächste</button></div>'
     + '<div class="small-btns"><button class="btn ghost" data-act="sos-quit">Abbrechen</button></div></div>');

@@ -392,6 +392,9 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 .remind{ display:flex; gap:8px; margin-top:8px; }
 .remind input{ width:110px; flex:none; padding:10px; border-radius:var(--r); border:1px solid var(--line); background:#050506; font-size:16px; color-scheme:dark; }
 .remind .btn{ flex:1; padding:10px; font-size:11px; }
+
+.code-box{ font-family:'JetBrains Mono', ui-monospace, Menlo, monospace; font-size:17px; letter-spacing:.06em; text-align:center; padding:16px 10px; margin:14px 0;
+  border:1px solid rgba(224,53,45,.55); border-radius:var(--r); background:#050506; user-select:all; -webkit-user-select:all; word-break:break-all; }
 </style>
 </head>
 <body>
@@ -428,7 +431,9 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.4.0';
+const VERSION = '3.5.0';
+// Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
+const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
 const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
@@ -492,6 +497,7 @@ function save(){
   idbPut('state', json).then(r => { if(!r && !ok) toast('Speichern fehlgeschlagen!'); });
   if(hasData(state)) idbPut('snap-' + dkey(today()), json).then(pruneSnaps);
   showSaved();
+  cloudDirty();
 }
 async function pruneSnaps(){
   const keys = ((await idbKeys()) || []).filter(k => String(k).startsWith('snap-')).sort();
@@ -685,6 +691,7 @@ function renderSetup(){
     + '<div class="field"><label for="su-why">Mein Warum <span style="font-weight:500">(freiwillig)</span></label><textarea id="su-why" maxlength="160" placeholder="z. B. Ich will im Frühling stärker, ruhiger und fitter sein.">' + esc(setupWhy) + '</textarea></div>'
     + custom
     + '<button class="btn wide" data-act="arc-go">Arc starten</button>'
+    + (cloudOn() ? '<button class="btn ghost wide" style="margin-top:10px" data-act="cloud-restore">Neues Handy? Mit Code wiederherstellen</button>' : '')
     + '</div></div>';
   $('#su-start').onchange = e => { if(e.target.value){ setupStart = e.target.value; if(isNyeSel) setupDays = untilNye(); renderSetup(); } };
   $('#su-why').oninput = e => setupWhy = e.target.value;
@@ -974,6 +981,7 @@ function openSettings(){
       + '<div class="remind"><input id="r-pm" type="time" value="' + state.remind.pm + '"><button class="btn ghost" data-act="remind-pm">Abends eintragen</button></div></div>'
     + '<div class="field"><label>Mut-Challenge</label><div class="seg" id="s-mut"><button data-v="1" class="' + (state.mutOn ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.mutOn ? 'on' : '') + '">Aus</button></div></div>'
     + '<div class="field"><label>Schneefall</label><div class="seg" id="s-snow"><button data-v="1" class="' + (state.snow ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.snow ? 'on' : '') + '">Aus</button></div></div>'
+    + cloudSettingsHtml()
     + '<div class="field"><label>Speicher</label><p class="note" style="margin:0 0 8px">Alles wird sofort doppelt auf diesem Gerät gespeichert, dazu jeden Tag eine Kopie (14 Tage).<br>'
       + (state.savedAt ? 'Zuletzt gespeichert: ' + new Date(state.savedAt).toLocaleString('de-DE', { dateStyle:'short', timeStyle:'short' }) + '<br>' : '')
       + 'Letzte Sicherung als Datei: ' + (state.lastBackup ? new Date(state.lastBackup).toLocaleDateString('de-DE') : 'noch nie') + '</p>'
@@ -1411,6 +1419,133 @@ async function storyGo(){
   }catch(e){ toast('Bild konnte nicht erstellt werden.'); }
 }
 
+/* ---------- Cloud: verschlüsselt, mit Wiederherstellungs-Code ----------
+   Auf dem Server liegt nur verschlüsselter Text. Schlüssel und Kennung entstehen aus dem Code – ohne Code kann niemand die Daten lesen. */
+const CLOUD_KEY = 'winterarc_cloud';
+const cloudOn = () => !!(CLOUD.url && CLOUD.key);
+function cloudMeta(){ try{ return JSON.parse(localStorage.getItem(CLOUD_KEY) || 'null'); }catch(e){ return null; } }
+function cloudSetMeta(m){ try{ if(m) localStorage.setItem(CLOUD_KEY, JSON.stringify(m)); else localStorage.removeItem(CLOUD_KEY); }catch(e){} if(m) idbPut('cloud', JSON.stringify(m)); else idbDel('cloud'); }
+const B32 = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+function cloudNewCode(){ const r = crypto.getRandomValues(new Uint8Array(20)); let c = ''; for(let i = 0; i < 20; i++){ if(i && i % 4 === 0) c += '-'; c += B32[r[i] % 32]; } return 'WOLF-' + c; }
+const cloudNorm = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^WOLF/, '');
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = str => Uint8Array.from(atob(str), ch => ch.charCodeAt(0));
+async function cloudKeys(code){
+  const n = cloudNorm(code), enc = new TextEncoder();
+  const idBuf = await crypto.subtle.digest('SHA-256', enc.encode('winterarc-id|' + n));
+  const id = [...new Uint8Array(idBuf)].map(x => x.toString(16).padStart(2, '0')).join('');
+  const base = await crypto.subtle.importKey('raw', enc.encode(n), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({ name:'PBKDF2', salt:enc.encode('winterarc-key-v1'), iterations:200000, hash:'SHA-256' }, base, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+  return { id, key };
+}
+let cloudK = null, cloudKFor = null;
+async function cloudGetKeys(code){ if(cloudKFor !== code){ cloudK = await cloudKeys(code); cloudKFor = code; } return cloudK; }
+async function cloudSeal(key, obj){
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
+  return 'v1.' + b64(iv) + '.' + b64(ct);
+}
+async function cloudOpen(key, str){
+  const [v, iv, ct] = String(str).split('.'); if(v !== 'v1') throw new Error('format');
+  const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv:unb64(iv) }, key, unb64(ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function cloudRpc(fn, body){
+  const r = await fetch(CLOUD.url.replace(/\/$/, '') + '/rest/v1/rpc/' + fn, { method:'POST',
+    headers:{ apikey:CLOUD.key, Authorization:'Bearer ' + CLOUD.key, 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+  if(!r.ok) throw new Error('http ' + r.status);
+  return r.json();
+}
+const cloudPayload = () => { const c = JSON.parse(JSON.stringify(state)); delete c.savedAt; return c; };
+let cloudBusy = false, cloudTimer = null, cloudStatus = '';
+function cloudDirty(){
+  const m = cloudMeta(); if(!cloudOn() || !m) return;
+  if(!m.dirty){ m.dirty = true; cloudSetMeta(m); }
+  clearTimeout(cloudTimer); cloudTimer = setTimeout(() => cloudSync(), 2500);
+}
+// Holen, wenn auf dem Server etwas Neueres liegt; danach eigene Änderungen hochladen. Nichts wird blind überschrieben.
+async function cloudSync(){
+  const m = cloudMeta(); if(!cloudOn() || !m || cloudBusy) return;
+  if(!navigator.onLine){ cloudStatus = 'offline'; return; }
+  cloudBusy = true;
+  try{
+    const K = await cloudGetKeys(m.code);
+    for(let attempt = 0; attempt < 3; attempt++){
+      const rows = await cloudRpc('wa_get', { p_id:K.id });
+      const row = Array.isArray(rows) ? rows[0] : null;
+      if(row && +row.rev > (m.rev || 0)){
+        const remote = normalize(await cloudOpen(K.key, row.data));
+        if(remote){
+          if(m.dirty) mergeIn(remote); else { const keep = { lastBackup:state.lastBackup }; state = Object.assign(remote, keep); }
+          state.rev = Math.max(state.rev || 0, remote.rev || 0) + 1;
+          try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} idbPut('state', JSON.stringify(state));
+          if($('#modal').hidden) render();
+        }
+        m.rev = +row.rev; cloudSetMeta(m);
+      }
+      if(!m.dirty && row){ break; }
+      const nr = await cloudRpc('wa_put', { p_id:K.id, p_data:await cloudSeal(K.key, cloudPayload()), p_base:m.rev || 0 });
+      if(nr !== null && nr !== undefined){ m.rev = +nr; m.dirty = false; m.at = new Date().toISOString(); cloudSetMeta(m); break; }
+      // Konflikt: jemand anderes (anderes Gerät) war schneller – neu holen, zusammenführen, nochmal
+    }
+    cloudStatus = 'ok';
+  }catch(e){ cloudStatus = 'fehler'; }
+  cloudBusy = false;
+  const el = $('#cloud-st'); if(el) el.textContent = cloudStatusText();
+}
+function cloudStatusText(){
+  const m = cloudMeta(); if(!m) return '';
+  if(cloudStatus === 'fehler') return 'Keine Verbindung zur Cloud – versuche es später nochmal.';
+  if(cloudStatus === 'offline') return 'Offline – wird hochgeladen, sobald du Internet hast.';
+  return m.at ? '✓ In der Cloud gesichert: ' + new Date(m.at).toLocaleString('de-DE', { dateStyle:'short', timeStyle:'short' }) : 'Wird gesichert …';
+}
+function cloudSettingsHtml(){
+  if(!cloudOn()) return '<div class="field"><label>Cloud-Sicherung</label><p class="note" style="margin:0">Kommt bald: verschlüsselte Sicherung in der Cloud.</p></div>';
+  const m = cloudMeta();
+  if(!m) return '<div class="field"><label>Cloud-Sicherung</label><p class="note" style="margin:0 0 8px">Sichert alles verschlüsselt in der Cloud. Mit deinem Code holst du es auf jedes Handy zurück. Ohne Code kann niemand die Daten lesen – auch nicht der Server.</p>'
+    + '<button class="btn wide" data-act="cloud-new">Cloud einschalten</button><button class="btn ghost wide" style="margin-top:8px" data-act="cloud-restore">Ich habe schon einen Code</button></div>';
+  return '<div class="field"><label>Cloud-Sicherung</label><p class="note" style="margin:0 0 8px" id="cloud-st">' + cloudStatusText() + '</p>'
+    + '<div class="row-btns"><button class="btn ghost" data-act="cloud-show">Code anzeigen</button><button class="btn ghost" data-act="cloud-now">Jetzt sichern</button></div>'
+    + '<div class="small-btns"><button class="btn ghost" data-act="cloud-off">Cloud auf diesem Handy ausschalten</button></div></div>';
+}
+function cloudShow(code, first){
+  openSheet('<h3>' + (first ? 'Dein Code' : 'Wiederherstellungs-Code') + '</h3>'
+    + '<p>Mit diesem Code holst du alles zurück – auf jedem Handy. <b>Speicher ihn sicher</b>, z. B. im iPhone-Passwort-Manager oder als Screenshot in einem sicheren Ordner.</p>'
+    + '<div class="code-box" id="code-box">' + esc(code) + '</div>'
+    + '<p class="note">Ohne diesen Code kommt niemand an deine Daten – auch du nicht. Gib ihn niemandem.</p>'
+    + '<div class="row-btns"><button class="btn ghost" data-act="cloud-copy">Kopieren</button><button class="btn" data-act="cancel">' + (first ? 'Gespeichert' : 'Fertig') + '</button></div>');
+}
+async function cloudNew(){
+  const code = cloudNewCode();
+  cloudSetMeta({ code, rev:0, dirty:true });
+  cloudShow(code, true);
+  await cloudSync();
+}
+function cloudRestoreOpen(){
+  openSheet('<h3>Code eingeben</h3><p class="note" style="margin:0 0 12px">Gib deinen Wiederherstellungs-Code ein (WOLF-…).</p>'
+    + '<div class="field"><input id="cloud-in" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="WOLF-XXXX-XXXX-XXXX-XXXX-XXXX" style="width:100%;padding:12px;border-radius:var(--r);border:1px solid var(--line);background:#050506;font-size:16px;letter-spacing:.06em"></div>'
+    + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="cloud-restore-go">Wiederherstellen</button></div>');
+}
+async function cloudRestoreGo(){
+  const raw = ($('#cloud-in').value || '').trim(), n = cloudNorm(raw);
+  if(n.length !== 20){ toast('Der Code ist nicht vollständig.'); return; }
+  const code = 'WOLF-' + n.match(/.{4}/g).join('-');
+  toast('Suche deine Daten …');
+  try{
+    const K = await cloudGetKeys(code);
+    const rows = await cloudRpc('wa_get', { p_id:K.id }), row = Array.isArray(rows) ? rows[0] : null;
+    if(!row){ toast('Zu diesem Code gibt es keine Daten.'); return; }
+    const remote = normalize(await cloudOpen(K.key, row.data));
+    if(!remote) throw 0;
+    const local = hasData(state);
+    if(local) mergeIn(remote); else state = remote;
+    state.rev = Math.max(state.rev || 0, remote.rev || 0) + 1;
+    cloudSetMeta({ code, rev:+row.rev, dirty:local });
+    save(); closeSheet(); tab = 'today'; render(); toast('Alles wiederhergestellt.');
+    if(local) cloudSync();
+  }catch(e){ toast('Wiederherstellen hat nicht geklappt. Code prüfen oder später nochmal.'); }
+}
+
 /* ---------- Speicher-Warnungen ---------- */
 function storageWarnHtml(){
   let h = '';
@@ -1535,6 +1670,14 @@ document.addEventListener('click', e => {
   else if(act === 'remind-am') remindAdd('am');
   else if(act === 'remind-pm') remindAdd('pm');
   else if(act === 'story') storyOpen();
+  else if(act === 'cloud-new') cloudNew();
+  else if(act === 'cloud-restore') cloudRestoreOpen();
+  else if(act === 'cloud-restore-go') cloudRestoreGo();
+  else if(act === 'cloud-show'){ const m = cloudMeta(); if(m) cloudShow(m.code, false); }
+  else if(act === 'cloud-copy'){ const m = cloudMeta(); if(m && navigator.clipboard) navigator.clipboard.writeText(m.code).then(() => toast('Code kopiert.'), () => toast('Kopieren ging nicht – bitte abschreiben.')); }
+  else if(act === 'cloud-now'){ const m = cloudMeta(); if(m){ m.dirty = true; cloudSetMeta(m); cloudSync().then(() => toast(cloudStatus === 'ok' ? 'In der Cloud gesichert.' : 'Hat nicht geklappt.')); } }
+  else if(act === 'cloud-off') openSheet('<h3>Cloud ausschalten?</h3><p>Dieses Handy sichert dann nicht mehr in die Cloud. Deine Daten in der Cloud bleiben erhalten – mit deinem Code holst du sie jederzeit zurück.</p><div class="row-btns"><button class="btn" data-act="cancel">Abbrechen</button><button class="btn danger" data-act="cloud-off-ok">Ausschalten</button></div>');
+  else if(act === 'cloud-off-ok'){ cloudSetMeta(null); closeSheet(); toast('Cloud ausgeschaltet.'); }
   else if(act === 'story-go') storyGo();
   else if(act === 'relapse') relapse(b.dataset.id);
   else if(act === 'relapse-ok'){ const c = state.counters.find(x => x.id === b.dataset.id); if(c){ c.best = Math.max(c.best || 0, cDays(c)); c.relapses.push(dkey(today())); c.start = dkey(today()); save(); closeSheet(); render(); toast('Tag 0. Steh auf. Weiter.'); } }
@@ -1565,6 +1708,7 @@ function dayCheck(){ const k = dkey(today()); if(k !== lastDay){ if(dkey(viewDay
 document.addEventListener('visibilitychange', () => {
   if(document.hidden) return;
   if(Date.now() - lastUpdateCheck > 5*60*1000) checkUpdate(false);
+  cloudSync();
   const ls = loadLS();
   if(ls && hasData(ls) && ls.rev > (state.rev || 0) && $('#modal').hidden){ state = ls; render(); }
   else if(hasData(state) && !(ls && hasData(ls))){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} idbPut('state', JSON.stringify(state)); }
@@ -1577,7 +1721,11 @@ window.addEventListener('storage', e => { if(e.key === KEY){ const ls = loadLS()
 $('#ver').textContent = 'Version ' + VERSION;
 if(location.search) history.replaceState(null, '', location.pathname);
 render();
-bootStorage().then(whatsNew);
+bootStorage().then(async () => {
+  if(!cloudMeta()){ try{ const c = await idbGet('cloud'); if(c) localStorage.setItem(CLOUD_KEY, c); }catch(e){} }
+  whatsNew(); cloudSync();
+});
+window.addEventListener('online', () => cloudSync());
 setTimeout(() => checkUpdate(false), 1500);
 </script>
 </body>

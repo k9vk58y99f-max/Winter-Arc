@@ -318,11 +318,11 @@ nav.bar button.on{ color:#fff; }
 .coin{ width:60px; aspect-ratio:1; border-radius:50%; display:grid; place-items:center;
   background:radial-gradient(circle at 32% 28%, #4a4e57 0%, #1c1d21 55%, #0b0b0d 100%);
   border:2px solid #b8bec8; box-shadow:inset 0 0 0 4px #141518, inset 0 0 0 5px rgba(255,255,255,.28), 0 0 18px rgba(255,255,255,.14); }
-.coin span{ font-family:var(--serif); font-size:24px; font-weight:600; color:#fff; text-shadow:0 1px 0 #000; }
+.coin span{ font-family:var(--serif); font-size:calc(24px * var(--f, 1)); letter-spacing:.02em; font-weight:600; color:#fff; text-shadow:0 1px 0 #000; }
 .coin.lock{ background:#0d0d0f; border:1px dashed rgba(255,255,255,.25); box-shadow:none; }
 .coin.lock span{ color:rgba(255,255,255,.25); }
 .coin.big{ width:132px; margin:16px auto 0; border-width:3px; box-shadow:inset 0 0 0 7px #141518, inset 0 0 0 8px rgba(255,255,255,.3), 0 0 50px rgba(255,255,255,.25); }
-.coin.big span{ font-size:52px; }
+.coin.big span{ font-size:calc(52px * var(--f, 1)); }
 .kick{ font-size:10.5px; font-weight:800; letter-spacing:.3em; text-transform:uppercase; color:var(--lamp); }
 
 /* Rot wie die Augen des Wolfs – sparsam, nur für Fortschritt und Belohnung */
@@ -378,7 +378,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.2.1';
+const VERSION = '3.3.0';
 const KEY = 'winterarc_v1';
 const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
@@ -656,7 +656,13 @@ function badgeList(max){
   return l.sort((a, b) => a[0] - b[0]);
 }
 function badgeAt(n){ const l = badgeList(n); let cur = null; for(const b of l) if(n >= b[0]) cur = b; return { cur, next:l.find(b => b[0] > n) }; }
-const coin = (n, cls) => '<div class="coin' + (cls ? ' ' + cls : '') + '"><span>' + n + '</span></div>';
+function roman(n){
+  if(!(n > 0)) return '0';
+  const R = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+  let out = ''; for(const [v, r] of R) while(n >= v){ out += r; n -= v; } return out;
+}
+const coin = (n, cls) => { const r = roman(n), f = r.length <= 2 ? 1 : r.length === 3 ? .82 : r.length === 4 ? .68 : r.length === 5 ? .56 : .46;
+  return '<div class="coin' + (cls ? ' ' + cls : '') + '" title="' + n + '"><span style="--f:' + f + '">' + r + '</span></div>'; };
 function earnedBadges(){
   const out = [], p = arcStats().perfect;
   for(const [n, name] of badgeList(p)) if(p >= n) out.push({ key:'d:' + n, n, name, what:'perfekte Tage' });
@@ -683,10 +689,11 @@ function arcCardHtml(){
   const A = arcInfo(), S = arcStats();
   if(A.before) return '<div class="arc"><div class="day">Startet bald</div><div class="big">in ' + (1 - A.day) + (1 - A.day === 1 ? ' Tag' : ' Tagen') + '</div></div>';
   const { cur, next } = badgeAt(S.perfect), prev = cur ? cur[0] : 0;
-  return '<div class="arc"><div class="day">Winter Arc · seit ' + shortDate(A.start) + A.start.getFullYear() + '</div><div class="big">Tag ' + A.day + '</div>'
+  return '<div class="arc"><div class="day">Winter Arc · seit ' + shortDate(A.start) + A.start.getFullYear() + '</div><div class="big">Tag ' + roman(A.day) + '</div>'
     + '<div class="rank">' + (cur ? 'Rang: <b>' + esc(cur[1]) + '</b> · ' : '') + 'nächstes Abzeichen „' + esc(next[1]) + '“ in ' + (next[0] - S.perfect) + ' perfekten ' + (next[0] - S.perfect === 1 ? 'Tag' : 'Tagen') + '</div>'
     + '<div class="bar"><b style="width:' + Math.round((S.perfect - prev) / (next[0] - prev) * 100) + '%"></b></div>'
-    + '<div class="row"><div><b>' + S.perfect + '</b><span>perfekte Tage</span></div><div><b>' + S.streak + '</b><span>perfekt am Stück</span></div><div><b>' + S.best + '</b><span>Rekord-Serie</span></div></div>'
+    + '<div class="row">' + [[S.perfect,'perfekte Tage'],[S.streak,'perfekt am Stück'],[S.best,'Rekord-Serie']].map(([v, l]) => { const r = roman(v);
+        return '<div><b style="font-size:' + (r.length <= 4 ? 30 : r.length <= 6 ? 24 : 19) + 'px" title="' + v + '">' + r + '</b><span>' + l + '</span></div>'; }).join('') + '</div>'
     + (state.arc.why ? '<div class="why">' + esc(state.arc.why) + '</div>' : '')
     + '</div>';
 }
@@ -1083,7 +1090,7 @@ function countersHtml(){
   return state.counters.map(c => {
     const n = cDays(c), best = Math.max(c.best || 0, n), ba = badgeAt(n), next = ba.next[0], prev = ba.cur ? ba.cur[0] : 0;
     return '<div class="counter"><div class="k">Clean · ' + esc(c.name) + '</div>'
-      + '<div class="n">' + n + ' <small>' + (n === 1 ? 'Tag' : 'Tage') + '</small></div>'
+      + '<div class="n">' + roman(n) + ' <small>' + (n === 1 ? 'Tag' : 'Tage') + ' · ' + n + '</small></div>'
       + '<div class="sub">Rekord ' + best + ' ' + (best === 1 ? 'Tag' : 'Tage') + ' · nächstes Abzeichen „' + esc(ba.next[1]) + '“ bei ' + next + (next === 1 ? ' Tag' : ' Tagen') + '</div>'
       + '<div class="bar"><b style="width:' + Math.round((n - prev) / (next - prev) * 100) + '%"></b></div>'
       + '<div class="row-btns"><button class="btn" data-act="sos" data-id="' + c.id + '">Drang? Notfallplan</button><button class="btn ghost" data-act="relapse" data-id="' + c.id + '">Rückfall</button></div></div>';
@@ -1164,6 +1171,7 @@ function whatsNew(){
   let seen = null; try{ seen = localStorage.getItem('winterarc_seen_ver'); localStorage.setItem('winterarc_seen_ver', VERSION); }catch(e){}
   if(!seen || seen === VERSION || !state.arc) return;
   openSheet('<h3>Neu in ' + VERSION + '</h3><ul class="news">'
+    + '<li><b>Wolf und Rot:</b> neues App-Symbol, rote Akzente für Fortschritt, Serien und Abzeichen. Tage und Abzeichen in römischen Zahlen.</li>'
     + '<li><b>Ohne Ende:</b> Dein Arc hat kein Enddatum mehr. Er läuft, solange du weitermachst.</li>'
     + '<li><b>Abzeichen und Ränge:</b> für perfekte Tage und für jeden Clean-Zähler – von „Erster Schritt“ bis „Tausend“ und darüber hinaus. Zu sehen unter „Mein Arc“.</li>'
     + '<li><b>Um 6 Uhr aufstehen</b> statt vor 7. „Neu beginnen“ fragt jetzt zweimal nach.</li>'

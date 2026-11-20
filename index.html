@@ -342,6 +342,56 @@ nav.bar button.on{ color:#fff; }
 nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a50; }
 .warn{ border-color:rgba(224,53,45,.55); background:rgba(224,53,45,.08); } .warn b{ color:#ff5a50; }
 .goal.won{ border-color:rgba(224,53,45,.5); } .goal.won h4::after{ color:#ff5a50; }
+
+/* Wolf in der Tageskarte */
+.arc.has-wolf{ padding-right:18px; }
+.wolf{ position:absolute; right:-6px; top:-6px; width:46%; aspect-ratio:1; background:center / cover no-repeat; cursor:pointer;
+  -webkit-mask-image:radial-gradient(circle at 55% 45%, #000 38%, transparent 70%); mask-image:radial-gradient(circle at 55% 45%, #000 38%, transparent 70%); opacity:.85; }
+.arc.has-wolf .day, .arc.has-wolf .big, .arc.has-wolf .wolfname, .arc.has-wolf .rank, .arc.has-wolf .bar, .arc.has-wolf .row, .arc.has-wolf .why{ position:relative; }
+.wolf.w1{ filter:grayscale(1) brightness(.75); width:34%; right:4px; top:10px; }
+.wolf.w2{ filter:grayscale(.7) brightness(.85); width:40%; }
+.wolf.w3{ filter:none; }
+.wolf.w4{ filter:saturate(1.3) drop-shadow(0 0 18px rgba(224,53,45,.45)); width:50%; }
+.wolf.w5{ filter:saturate(1.5) contrast(1.1) drop-shadow(0 0 30px rgba(224,53,45,.7)); width:54%; animation:wglow 4s ease-in-out infinite; }
+@keyframes wglow{ 50%{ filter:saturate(1.7) contrast(1.15) drop-shadow(0 0 44px rgba(224,53,45,.9)); } }
+.wolf.big{ position:relative; right:auto; top:auto; width:220px; margin:12px auto 0; }
+.arc.has-wolf .day, .arc.has-wolf .big{ pointer-events:none; }
+.wolfname{ display:flex; align-items:center; gap:12px; font-size:13px; color:var(--dim); font-weight:700; letter-spacing:.04em; margin:12px 0 4px; cursor:pointer; line-height:1.35; }
+.wolfname small{ font-size:11px; font-weight:600; letter-spacing:0; }
+.wolf-av{ width:58px; height:58px; flex:none; border-radius:50%; background:center 40% / 150% no-repeat; border:1px solid rgba(255,255,255,.18); }
+.wolf-av.w1{ filter:grayscale(1) brightness(.75); } .wolf-av.w2{ filter:grayscale(.7) brightness(.85); }
+.wolf-av.w4{ filter:saturate(1.3); box-shadow:0 0 16px rgba(224,53,45,.45); } .wolf-av.w5{ filter:saturate(1.5) contrast(1.1); box-shadow:0 0 26px rgba(224,53,45,.75); border-color:rgba(224,53,45,.6); }
+.wolfname b{ color:#fff; }
+.share-btn{ display:flex; align-items:center; justify-content:center; gap:8px; margin:16px auto 0; font-size:10.5px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); position:relative; }
+.share-btn svg{ width:16px; height:16px; }
+
+/* Mut-Challenge */
+.mut{ margin-top:22px; border:1px solid rgba(255,255,255,.18); border-radius:var(--r); padding:16px; background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.01)); }
+.mut .k{ font-size:10.5px; font-weight:800; letter-spacing:.26em; text-transform:uppercase; color:#ff5a50; }
+.mut .t{ font-family:var(--serif); font-size:23px; line-height:1.2; margin:8px 0 12px; }
+.mut .ok{ color:var(--dim); font-size:13px; font-weight:700; }
+.mut .row-btns .btn{ padding:12px 8px; font-size:11px; }
+
+/* Abend-Check */
+.check-card{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:14px; padding:16px; border:1px solid var(--line); border-radius:var(--r);
+  background:var(--panel); font-family:var(--serif); font-size:21px; cursor:pointer; }
+.check-card span{ font-family:'Manrope', sans-serif; font-size:10.5px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--dim); }
+.check-card.due{ border-color:rgba(224,53,45,.55); box-shadow:0 0 18px rgba(224,53,45,.15); }
+.check-card.due span{ color:#ff5a50; }
+.check-card.done{ font-size:17px; }
+.seg.moodsel button{ flex:1; padding:10px 4px; }
+.moodbars{ display:flex; align-items:flex-end; gap:4px; height:70px; margin:12px 0 10px; }
+.moodbars i{ flex:1; background:#fff; border-radius:1px; min-height:3px; }
+
+/* Notfall-Uhr */
+.btn.red{ background:var(--red); color:#fff; box-shadow:0 0 18px var(--red-glow); }
+.sos-clock{ font-family:var(--serif); font-size:96px; line-height:1; margin:18px 0 10px; text-shadow:0 0 30px var(--red-glow); }
+.sos-step{ font-family:var(--serif); font-size:24px; line-height:1.25; min-height:90px; margin-bottom:12px; }
+
+/* Erinnerung */
+.remind{ display:flex; gap:8px; margin-top:8px; }
+.remind input{ width:110px; flex:none; padding:10px; border-radius:var(--r); border:1px solid var(--line); background:#050506; font-size:16px; color-scheme:dark; }
+.remind .btn{ flex:1; padding:10px; font-size:11px; }
 </style>
 </head>
 <body>
@@ -378,7 +428,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.3.0';
+const VERSION = '3.4.0';
 const KEY = 'winterarc_v1';
 const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
@@ -411,9 +461,10 @@ function normalize(s){
   if(Array.isArray(s.rules)) s.rules = s.rules.map(ren);
   return { arc:s.arc || null, badges:Array.isArray(s.badges) ? s.badges : null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false,
     todos:Array.isArray(s.todos) ? s.todos : [], goals:Array.isArray(s.goals) ? s.goals : [], rules:Array.isArray(s.rules) ? s.rules : [],
-    counters:Array.isArray(s.counters) ? s.counters : [], lastBackup:s.lastBackup || null, rev:+s.rev || 0, savedAt:s.savedAt || null };
+    counters:Array.isArray(s.counters) ? s.counters : [], checkins:(s.checkins && typeof s.checkins === 'object') ? s.checkins : {}, urgeWins:Array.isArray(s.urgeWins) ? s.urgeWins : [],
+    mut:(s.mut && typeof s.mut === 'object') ? s.mut : { level:1, done:{} }, mutOn:s.mutOn !== false, remind:s.remind || { am:'06:00', pm:'21:00' }, lastBackup:s.lastBackup || null, rev:+s.rev || 0, savedAt:s.savedAt || null };
 }
-function EMPTY(){ return { arc:null, badges:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[], counters:[], lastBackup:null, rev:0, savedAt:null }; }
+function EMPTY(){ return { checkins:{}, urgeWins:[], mut:{ level:1, done:{} }, mutOn:true, remind:{ am:'06:00', pm:'21:00' }, arc:null, badges:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[], counters:[], lastBackup:null, rev:0, savedAt:null }; }
 function loadLS(){ try{ return normalize(JSON.parse(localStorage.getItem(KEY) || 'null')); }catch(e){ return null; } }
 function load(){ return loadLS() || EMPTY(); }
 const hasData = s => !!(s && (s.arc || s.habits.length || s.goals.length || s.todos.length || s.counters.length || s.rules.length));
@@ -685,17 +736,40 @@ function badgeCheck(){
     + '<div class="row-btns" style="margin-top:18px"><button class="btn" data-act="cancel">Weiter</button></div>');
 }
 
-function arcCardHtml(){
+/* ---------- Der Wolf wächst mit ---------- */
+const WOLF = [
+  { min:0,   name:'Welpe',        img:'img/wolf.webp', cls:'w1' },
+  { min:7,   name:'Einzelgänger', img:'img/wolf.webp', cls:'w2' },
+  { min:30,  name:'Jäger',        img:'img/wolf.webp', cls:'w3' },
+  { min:100, name:'Alpha',        img:'img/wolf.webp', cls:'w4' },
+  { min:365, name:'Legende',      img:'img/wolf.webp', cls:'w5' }
+];
+function wolfStage(p){ let w = WOLF[0]; for(const x of WOLF) if(p >= x.min) w = x; return w; }
+function wolfNext(p){ return WOLF.find(x => x.min > p); }
+
+function arcCardHtml(compact){
   const A = arcInfo(), S = arcStats();
   if(A.before) return '<div class="arc"><div class="day">Startet bald</div><div class="big">in ' + (1 - A.day) + (1 - A.day === 1 ? ' Tag' : ' Tagen') + '</div></div>';
   const { cur, next } = badgeAt(S.perfect), prev = cur ? cur[0] : 0;
-  return '<div class="arc"><div class="day">Winter Arc · seit ' + shortDate(A.start) + A.start.getFullYear() + '</div><div class="big">Tag ' + roman(A.day) + '</div>'
+  const W = wolfStage(S.perfect), WN = wolfNext(S.perfect);
+  return '<div class="arc">'
+    + '<div class="day">Winter Arc · seit ' + shortDate(A.start) + A.start.getFullYear() + '</div><div class="big" style="font-size:' + (roman(A.day).length > 7 ? 38 : roman(A.day).length > 5 ? 44 : 52) + 'px">Tag ' + roman(A.day) + '</div>'
+    + '<div class="wolfname" data-act="wolf-info"><span class="wolf-av ' + W.cls + '" style="background-image:url(' + W.img + ')"></span><span>Dein Wolf: <b>' + W.name + '</b>' + (WN ? '<br><small>nächste Stufe „' + WN.name + '“ in ' + (WN.min - S.perfect) + ' perfekten Tagen</small>' : '') + '</span></div>'
     + '<div class="rank">' + (cur ? 'Rang: <b>' + esc(cur[1]) + '</b> · ' : '') + 'nächstes Abzeichen „' + esc(next[1]) + '“ in ' + (next[0] - S.perfect) + ' perfekten ' + (next[0] - S.perfect === 1 ? 'Tag' : 'Tagen') + '</div>'
     + '<div class="bar"><b style="width:' + Math.round((S.perfect - prev) / (next[0] - prev) * 100) + '%"></b></div>'
     + '<div class="row">' + [[S.perfect,'perfekte Tage'],[S.streak,'perfekt am Stück'],[S.best,'Rekord-Serie']].map(([v, l]) => { const r = roman(v);
         return '<div><b style="font-size:' + (r.length <= 4 ? 30 : r.length <= 6 ? 24 : 19) + 'px" title="' + v + '">' + r + '</b><span>' + l + '</span></div>'; }).join('') + '</div>'
-    + (state.arc.why ? '<div class="why">' + esc(state.arc.why) + '</div>' : '')
+    + (!compact && state.arc.why ? '<div class="why">' + esc(state.arc.why) + '</div>' : '')
+    + (compact ? '' : '<button class="share-btn" data-act="story" aria-label="Als Story teilen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>Teilen</button>')
     + '</div>';
+}
+function wolfInfo(){
+  const p = arcStats().perfect, W = wolfStage(p), N = wolfNext(p);
+  openSheet('<div style="text-align:center"><div class="kick">Dein Wolf</div><div class="wolf big ' + W.cls + '" style="background-image:url(' + W.img + ')"></div><h3 style="margin:14px 0 6px">' + W.name + '</h3>'
+    + '<p class="note" style="margin:0 0 14px">' + p + ' perfekte Tage</p></div>'
+    + '<div class="rules">' + WOLF.map(x => '<div class="rule-i" style="counter-increment:none"><div class="t" style="' + (p >= x.min ? '' : 'opacity:.35') + '">' + x.name + ' <span class="note">· ab ' + x.min + ' perfekten Tagen</span></div>' + (p >= x.min ? '<span style="color:#ff5a50">✓</span>' : '') + '</div>').join('') + '</div>'
+    + (N ? '<p style="text-align:center;font-family:var(--serif);font-size:20px;margin:16px 0 0">Noch ' + (N.min - p) + ' perfekte Tage bis „' + N.name + '“.</p>' : '<p style="text-align:center;font-family:var(--serif);font-size:20px;margin:16px 0 0">Ganz oben. Bleib da.</p>')
+    + '<div class="row-btns" style="margin-top:16px"><button class="btn" data-act="cancel">Weiter</button></div>');
 }
 function quoteHtml(){
   const n = Math.floor(today() / 864e5);
@@ -710,11 +784,12 @@ function renderToday(){
   const hs = activeHabits();
   const t = today(), k = dkey(viewDay), isToday = k === dkey(t);
   const label = isToday ? 'Heute' : (k === dkey(addDays(t,-1)) ? 'Gestern' : longDate(viewDay));
-  let html = (isToday ? storageWarnHtml() : '') + arcCardHtml() + (isToday ? countersHtml() + quoteHtml() : '');
+  let html = (isToday ? storageWarnHtml() : '') + arcCardHtml(true);
   html += '<div class="daynav"><button class="icon-btn" data-act="prev" aria-label="Vorheriger Tag">' + ARROW_L + '</button>'
     + '<div class="lbl"><b>' + label + '</b><span>' + (isToday ? longDate(viewDay) : 'Nachtragen') + '</span></div>'
     + '<button class="icon-btn" data-act="next" aria-label="Nächster Tag"' + (isToday ? ' disabled' : '') + '>' + ARROW_R + '</button></div>';
-  if(!hs.length){ $('#view').innerHTML = html + '<div style="height:16px"></div>' + emptyHtml() + (isToday ? todosHtml() : ''); bindTodoInput(); return; }
+  const tail = () => isToday ? mutHtml() + countersHtml() + checkinCardHtml() + todosHtml() + quoteHtml() : '';
+  if(!hs.length){ $('#view').innerHTML = html + '<div style="height:16px"></div>' + emptyHtml() + tail(); bindTodoInput(); return; }
 
   const due = [], free = [];
   for(const h of hs){
@@ -726,10 +801,11 @@ function renderToday(){
   const msg = !total ? 'Heute ist nichts fällig.' : done === total ? 'Perfekter Tag.' : done === 0 ? 'Keine Ausreden.' : 'Nicht aufhören.';
   html += '<div class="summary"><svg class="ring" viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="26"/><circle class="fg" cx="32" cy="32" r="26" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C*(1-pct)) + '"/><text x="32" y="32">' + done + '/' + total + '</text></svg>'
     + '<p><b>' + msg + '</b>' + (total ? Math.round(pct*100) + ' % erledigt' : '') + '</p></div>';
-  html += '<div class="list">' + due.map(h => habitRow(h, k)).join('') + '</div>';
+  const ordered = due.filter(h => !isDone(h, k)).concat(due.filter(h => isDone(h, k)));
+  html += '<div class="list">' + ordered.map(h => habitRow(h, k)).join('') + '</div>';
   if(free.length) html += '<h2>' + (isToday ? 'Heute frei' : 'An diesem Tag frei') + '</h2><div class="list">' + free.map(h => habitRow(h, k, true)).join('') + '</div>';
   html += '<div class="add-row"><button class="btn ghost wide" data-act="add">+ Gewohnheit</button></div>';
-  if(isToday) html += todosHtml();
+  html += tail();
   $('#view').innerHTML = html;
   bindTodoInput();
 }
@@ -797,6 +873,7 @@ function renderStats(){
   }
   let html = arcCardHtml()
     + badgesHtml()
+    + checkinStatsHtml()
     + '<h2>Jeder Tag zählt</h2><div class="card"><div class="note">' + (first ? 'Die letzten ' + (A.day - first) + ' Tage' : 'Seit ' + shortDate(A.start) + A.start.getFullYear()) + ' · ein Feld = ein Tag</div>'
     + '<div class="arcgrid">' + grid + '</div>'
     + '<div class="legend">wenig <i style="background:#2a2c31"></i><i style="background:#55585f"></i><i style="background:#9a9da3"></i><i style="background:#fff"></i> perfekt</div></div>';
@@ -823,7 +900,7 @@ function renderStats(){
 
 /* ---------- Fenster ---------- */
 function openSheet(html){ $('#sheet').innerHTML = html; $('#modal').hidden = false; }
-function closeSheet(){ $('#modal').hidden = true; $('#sheet').innerHTML = ''; }
+function closeSheet(){ clearInterval(sosTimer); $('#modal').hidden = true; $('#sheet').innerHTML = ''; }
 $('#modal').addEventListener('click', e => { if(e.target.id === 'modal') closeSheet(); });
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#modal').hidden) closeSheet(); });
 
@@ -892,6 +969,10 @@ function openSettings(){
     + (a ? '<div class="field"><label for="s-why">Mein Warum</label><textarea id="s-why" maxlength="160">' + esc(a.why || '') + '</textarea></div>'
       + '<p class="note" style="margin:-8px 0 16px">Dabei seit ' + longDate(fromKey(a.start)) + ' ' + fromKey(a.start).getFullYear() + ' · kein Enddatum</p>' : '')
     + '<div class="field"><label>Woche beginnt am</label><div class="seg" id="s-ws"><button data-v="1" class="' + (state.weekStart === 1 ? 'on' : '') + '">Montag</button><button data-v="0" class="' + (state.weekStart === 0 ? 'on' : '') + '">Sonntag</button></div></div>'
+    + '<div class="field"><label>Erinnerung im Kalender</label><p class="note" style="margin:0 0 8px">Legt einen täglichen Termin mit Hinweis in deinem iPhone-Kalender an.</p>'
+      + '<div class="remind"><input id="r-am" type="time" value="' + state.remind.am + '"><button class="btn ghost" data-act="remind-am">Morgens eintragen</button></div>'
+      + '<div class="remind"><input id="r-pm" type="time" value="' + state.remind.pm + '"><button class="btn ghost" data-act="remind-pm">Abends eintragen</button></div></div>'
+    + '<div class="field"><label>Mut-Challenge</label><div class="seg" id="s-mut"><button data-v="1" class="' + (state.mutOn ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.mutOn ? 'on' : '') + '">Aus</button></div></div>'
     + '<div class="field"><label>Schneefall</label><div class="seg" id="s-snow"><button data-v="1" class="' + (state.snow ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.snow ? 'on' : '') + '">Aus</button></div></div>'
     + '<div class="field"><label>Speicher</label><p class="note" style="margin:0 0 8px">Alles wird sofort doppelt auf diesem Gerät gespeichert, dazu jeden Tag eine Kopie (14 Tage).<br>'
       + (state.savedAt ? 'Zuletzt gespeichert: ' + new Date(state.savedAt).toLocaleString('de-DE', { dateStyle:'short', timeStyle:'short' }) + '<br>' : '')
@@ -904,6 +985,9 @@ function openSettings(){
     + '<div class="row-btns" style="margin-top:18px"><button class="btn" data-act="cancel">Fertig</button></div>');
   if($('#s-why')) $('#s-why').oninput = e => { state.arc.why = e.target.value.slice(0,160); save(); render(); };
   $('#s-ws').onclick = e => { const b = e.target.closest('button'); if(!b) return; state.weekStart = +b.dataset.v; save(); render(); openSettings(); };
+  $('#s-mut').onclick = e => { const b = e.target.closest('button'); if(!b) return; state.mutOn = b.dataset.v === '1'; save(); render(); openSettings(); };
+  $('#r-am').onchange = e => { if(e.target.value){ state.remind.am = e.target.value; save(); } };
+  $('#r-pm').onchange = e => { if(e.target.value){ state.remind.pm = e.target.value; save(); } };
   $('#s-snow').onclick = e => { const b = e.target.closest('button'); if(!b) return; state.snow = b.dataset.v === '1'; save(); render(); openSettings(); };
 }
 function newArc(){
@@ -957,6 +1041,9 @@ function mergeIn(s){
       if(Array.isArray(s.rules)) for(const r of s.rules) if(typeof r === 'string' && r && !state.rules.includes(r)) state.rules.push(r.slice(0,100));
       if(Array.isArray(s.counters)) for(const c of s.counters) if(c && c.id && c.name && okDate(c.start) && !state.counters.some(x => x.id === c.id))
         state.counters.push({ id:String(c.id), name:String(c.name).slice(0,60), start:c.start, best:+c.best || 0, relapses:Array.isArray(c.relapses) ? c.relapses.filter(okDate) : [] });
+      if(s.checkins && typeof s.checkins === 'object') for(const k in s.checkins) if(okDate(k) && !state.checkins[k]) state.checkins[k] = s.checkins[k];
+      if(Array.isArray(s.urgeWins)) for(const w of s.urgeWins) if(w && w.t && !state.urgeWins.some(x => x.t === w.t)) state.urgeWins.push(w);
+      if(s.mut && (s.mut.level || 0) > (state.mut.level || 0)) state.mut = s.mut;
       for(const k in s.marks){ if(!okDate(k) || !Array.isArray(s.marks[k])) continue;
         state.marks[k] = [...new Set([...(state.marks[k] || []), ...s.marks[k].map(String)])]; }
     }
@@ -1123,13 +1210,205 @@ function sos(id){
     + '<li><b>Schreib jemandem</b> oder ruf einen Freund an.</li></ol>'
     + (g && g.why ? '<p class="quote" style="margin:16px 0 0;font-size:20px">„' + esc(g.why) + '“</p>' : '')
     + '<p class="note" style="text-align:center;margin:14px 0 0">' + cDays(c) + (cDays(c) === 1 ? ' Tag' : ' Tage') + ' clean. Wirf das nicht weg.</p>'
-    + '<div class="row-btns" style="margin-top:16px"><button class="btn" data-act="cancel">Ich bleib stark</button></div>');
+    + '<div class="row-btns" style="margin-top:16px"><button class="btn red" data-act="sos-start" data-id="' + c.id + '">10 Minuten durchhalten – Start</button></div>'
+    + '<div class="small-btns"><button class="btn ghost" data-act="cancel">Schon vorbei</button></div>');
+}
+const SOS_STEPS = ['Steh auf. Geh in einen anderen Raum. Licht an.','Leg das Handy weg – anderes Zimmer.','20 Liegestütze. Jetzt.','Kaltes Wasser ins Gesicht oder kalt duschen.','Zieh dich an und geh raus. Einmal um den Block.','Schreib einem Kumpel oder ruf jemanden an.','Atme: 4 Sekunden ein, 4 halten, 6 aus. Zehnmal.','50 Kniebeugen.'];
+let sosTimer = null, sosEnd = 0, sosStep = 0, sosCounter = null;
+function sosStart(id){
+  sosCounter = id; sosEnd = Date.now() + 10*60*1000; sosStep = 0;
+  openSheet('<div style="text-align:center"><div class="kick">Der Drang verliert</div><div class="sos-clock" id="sos-clock">10:00</div>'
+    + '<div class="sos-step" id="sos-step"></div><div class="row-btns"><button class="btn ghost" data-act="sos-next">Erledigt – nächste</button></div>'
+    + '<div class="small-btns"><button class="btn ghost" data-act="sos-quit">Abbrechen</button></div></div>');
+  sosDraw(); clearInterval(sosTimer); sosTimer = setInterval(sosTick, 500);
+}
+function sosDraw(){ const e = $('#sos-step'); if(e) e.textContent = SOS_STEPS[sosStep % SOS_STEPS.length]; }
+function sosTick(){
+  const el = $('#sos-clock'); if(!el){ clearInterval(sosTimer); return; }
+  const left = Math.max(0, sosEnd - Date.now()), m = Math.floor(left / 60000), sec = Math.floor(left / 1000) % 60;
+  el.textContent = m + ':' + pad(sec);
+  if(left <= 0){
+    clearInterval(sosTimer);
+    state.urgeWins.push({ t:new Date().toISOString(), c:sosCounter }); save();
+    const n = state.urgeWins.length;
+    openSheet('<div style="text-align:center"><div class="kick">10 Minuten überstanden</div><h3 style="font-size:44px;margin:18px 0 8px">Gewonnen.</h3>'
+      + '<p>Der Drang ist vorbei. Du nicht.</p><p class="note">' + n + (n === 1 ? ' Drang' : ' Mal Drang') + ' besiegt, seit du zählst.</p></div>'
+      + '<div class="row-btns" style="margin-top:16px"><button class="btn" data-act="cancel">Weiter</button></div>');
+    if(navigator.vibrate) navigator.vibrate([30, 60, 30]);
+  }
 }
 function relapse(id){
   const c = state.counters.find(x => x.id === id); if(!c) return;
   openSheet('<h3>Rückfall?</h3><p>Passiert. Wichtig ist nur, was du jetzt machst. Dein Rekord von ' + Math.max(c.best || 0, cDays(c)) + ' Tagen bleibt stehen, der Zähler beginnt wieder bei 0.</p>'
     + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn danger" data-act="relapse-ok" data-id="' + c.id + '">Neu anfangen</button></div>'
     + '<div class="small-btns"><button class="btn ghost" data-act="counter-del" data-id="' + c.id + '">Zähler löschen</button></div>');
+}
+
+/* ---------- Mut-Challenge ---------- */
+const MUT = [
+  'Halte heute bei drei fremden Menschen kurz Augenkontakt und lächle.',
+  'Sag heute zu drei Menschen laut und deutlich „Hallo“ oder „Guten Morgen“.',
+  'Frag eine fremde Person nach der Uhrzeit oder dem Weg.',
+  'Mach jemandem an der Kasse oder im Café ein ehrliches Kompliment.',
+  'Geh den ganzen Tag aufrecht: Schultern zurück, Blick nach vorn, langsam und ruhig.',
+  'Frag im Laden nach einer Empfehlung und führ ein kurzes Gespräch.',
+  'Starte mit einer fremden Person Small Talk – über das Wetter, den Ort, irgendwas.',
+  'Ruf heute jemanden an, statt zu schreiben.',
+  'Mach einem Mann ein ehrliches Kompliment für seinen Style.',
+  'Sitz 15 Minuten allein in einem Café – ohne Handy.',
+  'Mach einer Frau ein ehrliches, respektvolles Kompliment – und geh dann einfach weiter.',
+  'Führ ein Gespräch von mindestens 2 Minuten mit einer fremden Person.',
+  'Frag eine Frau nach einer Empfehlung (Café, Buch, Weg) und bleib kurz im Gespräch.',
+  'Lade einen Kumpel ein, heute oder morgen etwas mit dir zu machen.',
+  'Geh zu einem Kurs, Verein oder Treffen, wo du niemanden kennst.',
+  'Sprich eine Frau an, die dir gefällt, und stell dich mit deinem Namen vor.',
+  'Führ ein 5-Minuten-Gespräch mit einer Frau, die du nicht kennst.',
+  'Frag eine Frau, ob ihr Nummern oder Instagram tauschen wollt.',
+  'Schreib einer Frau, mit der du Kontakt hast, und schlag ein konkretes Treffen vor.',
+  'Geh auf ein Date. Egal wie es läuft – du bist hingegangen.'
+];
+function mutToday(){
+  const m = state.mut, k = dkey(today());
+  if(!m.today || m.today.d !== k){
+    const L = Math.min(m.level || 1, MUT.length + 1);
+    const idx = L <= MUT.length ? L - 1 : 10 + Math.floor(Math.random() * (MUT.length - 10));
+    m.today = { d:k, idx }; setTimeout(save, 0);
+  }
+  return m.today;
+}
+function mutHtml(){
+  if(!state.mutOn) return '';
+  const T = mutToday(), done = state.mut.done[dkey(today())] !== undefined, L = state.mut.level || 1;
+  return '<div class="mut"><div class="k">Mut-Challenge · Stufe ' + Math.min(L - (done ? 1 : 0), 999) + (L > MUT.length ? ' · Meister' : '') + '</div>'
+    + '<div class="t">' + esc(MUT[T.idx]) + '</div>'
+    + (done ? '<div class="ok">✓ Geschafft. Morgen kommt Stufe ' + L + '.</div>'
+      : '<div class="row-btns"><button class="btn" data-act="mut-done">Geschafft</button><button class="btn ghost" data-act="mut-swap">Andere</button></div>')
+    + '</div>';
+}
+
+/* ---------- Abend-Check ---------- */
+const MOODS = ['Mies','Schwach','Okay','Gut','Stark'];
+const TRIGGERS = ['Morgens','Abends','Nachts','Im Bett','Am Handy','Allein','Gelangweilt','Gestresst','Müde','Social Media'];
+function checkinCardHtml(){
+  const c = state.checkins[dkey(today())], h = new Date().getHours();
+  if(c) return '<div class="check-card done" data-act="checkin">Abend-Check erledigt · Tag war <b>' + MOODS[c.mood - 1] + '</b><span>ändern</span></div>';
+  return '<div class="check-card' + (h >= 18 ? ' due' : '') + '" data-act="checkin">Abend-Check<span>' + (h >= 18 ? 'Jetzt – 30 Sekunden' : 'ab heute Abend') + '</span></div>';
+}
+let ck = null;
+function checkinOpen(){
+  const k = dkey(today()), c = state.checkins[k];
+  ck = c ? JSON.parse(JSON.stringify(c)) : { mood:0, good:'', urge:'none', trig:[] };
+  drawCheckin();
+}
+function drawCheckin(){
+  openSheet('<h3>Abend-Check</h3>'
+    + '<div class="field"><label>Wie war dein Tag?</label><div class="seg moodsel" id="ck-mood">' + MOODS.map((m, i) => '<button data-v="' + (i + 1) + '" class="' + (ck.mood === i + 1 ? 'on' : '') + '">' + m + '</button>').join('') + '</div></div>'
+    + '<div class="field"><label for="ck-good">Was lief heute gut?</label><input id="ck-good" type="text" maxlength="140" value="' + esc(ck.good) + '" placeholder="Ein Satz reicht."></div>'
+    + '<div class="field"><label>Drang heute?</label><div class="seg" id="ck-urge">' + [['none','Nein'],['strong','Ja – stark geblieben'],['relapse','Rückfall']].map(([v, l]) => '<button data-v="' + v + '" class="' + (ck.urge === v ? 'on' : '') + '">' + l + '</button>').join('') + '</div></div>'
+    + (ck.urge !== 'none' ? '<div class="field"><label>Wann oder wobei?</label><div class="chips" id="ck-trig">' + TRIGGERS.map(t => '<button data-t="' + t + '" class="' + (ck.trig.includes(t) ? 'on' : '') + '">' + t + '</button>').join('') + '</div></div>' : '')
+    + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="checkin-save">Speichern</button></div>');
+  $('#ck-good').oninput = e => ck.good = e.target.value;
+  $('#ck-mood').onclick = e => { const b = e.target.closest('button'); if(!b) return; ck.mood = +b.dataset.v; drawCheckin(); };
+  $('#ck-urge').onclick = e => { const b = e.target.closest('button'); if(!b) return; ck.urge = b.dataset.v; drawCheckin(); };
+  if($('#ck-trig')) $('#ck-trig').onclick = e => { const b = e.target.closest('button'); if(!b) return; const t = b.dataset.t; ck.trig = ck.trig.includes(t) ? ck.trig.filter(x => x !== t) : [...ck.trig, t]; b.classList.toggle('on'); };
+}
+function checkinSave(){
+  if(!ck.mood){ toast('Wie war dein Tag? Tipp eins an.'); return; }
+  const wasRelapse = state.checkins[dkey(today())] && state.checkins[dkey(today())].urge === 'relapse';
+  state.checkins[dkey(today())] = { mood:ck.mood, good:(ck.good || '').trim().slice(0,140), urge:ck.urge, trig:ck.urge === 'none' ? [] : ck.trig };
+  save(); closeSheet(); render();
+  if(ck.urge === 'relapse' && !wasRelapse && state.counters.length) relapse(state.counters[0].id);
+  else toast(ck.mood >= 4 ? 'Stark. Morgen wieder.' : 'Notiert. Morgen ist ein neuer Tag.');
+}
+function checkinStatsHtml(){
+  const keys = Object.keys(state.checkins).sort();
+  if(!keys.length) return '';
+  const last = [...Array(14)].map((_, i) => dkey(addDays(today(), i - 13)));
+  const bars = last.map(k => { const c = state.checkins[k]; return '<i title="' + k + '" style="height:' + (c ? c.mood * 20 : 4) + '%;' + (c ? '' : 'opacity:.25') + (c && c.urge === 'relapse' ? ';background:var(--red)' : '') + '"></i>'; }).join('');
+  const recent = keys.slice(-30).map(k => state.checkins[k]), avg = recent.reduce((a, c) => a + c.mood, 0) / recent.length;
+  const tc = {}; for(const c of recent) for(const t of (c.trig || [])) tc[t] = (tc[t] || 0) + 1;
+  const top = Object.entries(tc).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const strong = recent.filter(c => c.urge === 'strong').length;
+  return '<h2>Abend-Checks</h2><div class="card"><div class="note">Die letzten 14 Tage – je höher, desto besser der Tag</div><div class="moodbars">' + bars + '</div>'
+    + '<div class="nums"><div><b>' + MOODS[Math.round(avg) - 1] + '</b><span>Schnitt (30 Tage)</span></div><div><b>' + strong + '</b><span>Drang besiegt</span></div><div><b>' + state.urgeWins.length + '</b><span>10-Min-Siege</span></div></div>'
+    + (top.length ? '<p class="note" style="margin:0">Dein Drang kommt meist: <b style="color:#fff">' + top.map(t => t[0]).join(', ') + '</b>. Genau da brauchst du einen Plan.</p>' : '')
+    + '</div>';
+}
+
+/* ---------- Erinnerung im Kalender ---------- */
+function icsEvent(time, title, text){
+  const [hh, mm] = time.split(':').map(Number), t = today(), now = new Date();
+  const start = new Date(t); start.setHours(hh, mm, 0, 0); if(start < now) start.setDate(start.getDate() + 1);
+  const f = d => d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00';
+  const url = location.origin + location.pathname;
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Winter Arc//DE','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+    'UID:winterarc-' + time.replace(':','') + '-' + Date.now() + '@winterarc','DTSTAMP:' + new Date().toISOString().replace(/[-:]/g,'').slice(0,15) + 'Z',
+    'DTSTART:' + f(start),'DURATION:PT10M','RRULE:FREQ=DAILY','SUMMARY:' + title,'DESCRIPTION:' + text + ' ' + url,'URL:' + url,
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + title,'TRIGGER:PT0M','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+}
+async function remindAdd(which){
+  const time = which === 'am' ? state.remind.am : state.remind.pm;
+  const title = which === 'am' ? 'Winter Arc – aufstehen. Keine Ausreden.' : 'Winter Arc – alles abgehakt? Abend-Check.';
+  const ics = icsEvent(time, title, which === 'am' ? 'Neuer Tag. Leg los.' : 'Öffne Winter Arc und hak den Tag ab.');
+  const name = 'Winter-Arc-' + (which === 'am' ? 'Morgen' : 'Abend') + '.ics';
+  const blob = new Blob([ics], { type:'text/calendar' });
+  try{
+    const file = new File([blob], name, { type:'text/calendar' });
+    if(isIOS() && navigator.canShare && navigator.canShare({ files:[file] })){ await navigator.share({ files:[file] }); return; }
+  }catch(e){ if(e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+
+/* ---------- Story zum Teilen ---------- */
+function storyOpen(){
+  openSheet('<h3>Als Story teilen</h3><p class="note" style="margin:0 0 14px">Ein Bild im Hochformat für Instagram, WhatsApp & Co.</p>'
+    + (state.counters.length ? '<div class="field"><label>Clean-Zähler zeigen?</label><div class="seg" id="st-c"><button data-v="0" class="on">Nein</button><button data-v="1">Ja</button></div></div>' : '')
+    + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="story-go">Bild erstellen</button></div>');
+  if($('#st-c')) $('#st-c').onclick = e => { const b = e.target.closest('button'); if(!b) return; document.querySelectorAll('#st-c button').forEach(x => x.classList.toggle('on', x === b)); };
+}
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+async function storyGo(){
+  const withClean = !!document.querySelector('#st-c button.on[data-v="1"]');
+  closeSheet(); toast('Bild wird erstellt …');
+  try{
+    await Promise.all([document.fonts.load('500 120px Cormorant'), document.fonts.load('700 40px Manrope'), document.fonts.load('italic 500 50px Cormorant')]);
+    const W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d');
+    g.fillStyle = '#050506'; g.fillRect(0, 0, W, H);
+    const bg = await loadImg('img/bg-tall.webp'), sc = Math.max(W / bg.width, H / bg.height);
+    g.globalAlpha = .55; g.drawImage(bg, (W - bg.width * sc) / 2, H - bg.height * sc, bg.width * sc, bg.height * sc); g.globalAlpha = 1;
+    let gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(5,5,6,.95)'); gr.addColorStop(.55, 'rgba(5,5,6,.55)'); gr.addColorStop(1, 'rgba(5,5,6,.85)'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    const A = arcInfo(), S = arcStats(), Wf = wolfStage(S.perfect);
+    const wolf = await loadImg(Wf.img); const ws = 560;
+    g.save(); g.beginPath(); g.arc(W / 2, 560, ws / 2, 0, Math.PI * 2); g.clip(); g.drawImage(wolf, W / 2 - ws / 2, 560 - ws / 2, ws, ws); g.restore();
+    gr = g.createRadialGradient(W / 2, 560, ws * .3, W / 2, 560, ws * .5); gr.addColorStop(0, 'rgba(5,5,6,0)'); gr.addColorStop(1, 'rgba(5,5,6,1)'); g.fillStyle = gr; g.beginPath(); g.arc(W / 2, 560, ws / 2 + 2, 0, Math.PI * 2); g.fill();
+    g.textAlign = 'center'; g.fillStyle = '#fff';
+    const spaced = (txt, x, y, sp) => { const chars = [...txt]; let w = 0; for(const c of chars) w += g.measureText(c).width + sp; w -= sp; let cx = x - w / 2; g.textAlign = 'left'; for(const c of chars){ g.fillText(c, cx, y); cx += g.measureText(c).width + sp; } g.textAlign = 'center'; };
+    g.font = '500 64px Cormorant'; spaced('WINTER ARC', W / 2, 190, 22);
+    let fs = 210; g.font = '500 ' + fs + 'px Cormorant'; while(g.measureText('TAG ' + roman(A.day)).width > W - 140 && fs > 90){ fs -= 6; g.font = '500 ' + fs + 'px Cormorant'; }
+    g.fillText('TAG ' + roman(A.day), W / 2, 1060);
+    g.fillStyle = '#ff5a50'; g.font = '800 34px Manrope'; spaced(('Rang: ' + (badgeAt(S.perfect).cur ? badgeAt(S.perfect).cur[1] : 'Anfänger') + ' · Wolf: ' + Wf.name).toUpperCase(), W / 2, 1140, 6);
+    g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(140, 1210, W - 280, 2);
+    const cols = [[S.perfect, 'PERFEKTE TAGE'], [S.streak, 'AM STÜCK'], [S.best, 'REKORD']];
+    if(withClean && state.counters.length) cols.push([cDays(state.counters[0]), 'TAGE CLEAN']);
+    const cw = (W - 200) / cols.length;
+    cols.forEach(([v, l], i) => { const x = 100 + cw * i + cw / 2; g.fillStyle = '#fff'; g.font = '300 96px Manrope'; g.fillText(String(v), x, 1340);
+      g.fillStyle = 'rgba(236,235,231,.6)'; g.font = '800 22px Manrope'; l.split(' ').forEach((part, j) => spaced(part, x, 1392 + j * 32, 5)); });
+    g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(140, 1450, W - 280, 2);
+    const n = Math.floor(today() / 864e5), q = QUOTES[n % QUOTES.length];
+    g.fillStyle = '#fff'; g.font = 'italic 500 56px Cormorant';
+    const words = q.split(' '), lines = []; let line = '';
+    for(const w of words){ const t = line ? line + ' ' + w : w; if(g.measureText(t).width > W - 200){ lines.push(line); line = w; } else line = t; } lines.push(line);
+    lines.forEach((l, i) => g.fillText((i === 0 ? '„' : '') + l + (i === lines.length - 1 ? '“' : ''), W / 2, 1560 + i * 70));
+    g.fillStyle = 'rgba(236,235,231,.45)'; g.font = '800 24px Manrope'; spaced('KEINE AUSREDEN.', W / 2, 1840, 10);
+    // Filmkorn
+    const id = g.getImageData(0, 0, W, H), d = id.data; for(let i = 0; i < d.length; i += 4){ const r = (Math.random() - .5) * 18; d[i] += r; d[i+1] += r; d[i+2] += r; } g.putImageData(id, 0, 0);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', .9));
+    const file = new File([blob], 'Winter-Arc-Tag-' + A.day + '.jpg', { type:'image/jpeg' });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){ try{ await navigator.share({ files:[file] }); }catch(e){} return; }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+    window.__lastStory = cv.toDataURL('image/jpeg', .8);
+  }catch(e){ toast('Bild konnte nicht erstellt werden.'); }
 }
 
 /* ---------- Speicher-Warnungen ---------- */
@@ -1171,6 +1450,13 @@ function whatsNew(){
   let seen = null; try{ seen = localStorage.getItem('winterarc_seen_ver'); localStorage.setItem('winterarc_seen_ver', VERSION); }catch(e){}
   if(!seen || seen === VERSION || !state.arc) return;
   openSheet('<h3>Neu in ' + VERSION + '</h3><ul class="news">'
+    + '<li><b>Heute neu sortiert:</b> Gewohnheiten ganz oben, Erledigtes rutscht nach unten.</li>'
+    + '<li><b>Dein Wolf wächst:</b> Welpe → Einzelgänger → Jäger → Alpha → Legende. Antippen zeigt, was noch fehlt.</li>'
+    + '<li><b>Mut-Challenge:</b> jeden Tag eine kleine Aufgabe, die dich mutiger macht – Stufe für Stufe.</li>'
+    + '<li><b>Abend-Check:</b> 30 Sekunden am Abend. Unter „Mein Arc“ siehst du, wann der Drang meistens kommt.</li>'
+    + '<li><b>Notfallplan mit Uhr:</b> 10 Minuten durchhalten, Aufgabe für Aufgabe. Jeder Sieg wird gezählt.</li>'
+    + '<li><b>Erinnerung:</b> morgens und abends als Termin in deinem Kalender (Einstellungen).</li>'
+    + '<li><b>Story teilen:</b> Tipp auf „Teilen“ in der Tageskarte.</li>'
     + '<li><b>Wolf und Rot:</b> neues App-Symbol, rote Akzente für Fortschritt, Serien und Abzeichen. Tage und Abzeichen in römischen Zahlen.</li>'
     + '<li><b>Ohne Ende:</b> Dein Arc hat kein Enddatum mehr. Er läuft, solange du weitermachst.</li>'
     + '<li><b>Abzeichen und Ränge:</b> für perfekte Tage und für jeden Clean-Zähler – von „Erster Schritt“ bis „Tausend“ und darüber hinaus. Zu sehen unter „Mein Arc“.</li>'
@@ -1238,6 +1524,18 @@ document.addEventListener('click', e => {
   else if(act === 'counter-new') counterNew();
   else if(act === 'counter-save') counterSave();
   else if(act === 'sos') sos(b.dataset.id);
+  else if(act === 'sos-start') sosStart(b.dataset.id);
+  else if(act === 'sos-next'){ sosStep++; sosDraw(); }
+  else if(act === 'sos-quit'){ closeSheet(); toast('Abgebrochen. Du schaffst das nächste Mal.'); }
+  else if(act === 'wolf-info') wolfInfo();
+  else if(act === 'mut-done'){ const T = mutToday(); state.mut.done[dkey(today())] = T.idx; state.mut.level = (state.mut.level || 1) + 1; save(); render(); toast('Mutig. Genau so.'); }
+  else if(act === 'mut-swap'){ const L = Math.min(state.mut.level || 1, MUT.length), lo = Math.max(0, L - 5), cur = mutToday().idx; let i = cur; for(let n = 0; n < 10 && i === cur; n++) i = lo + Math.floor(Math.random() * (L - lo)); state.mut.today.idx = i; save(); render(); }
+  else if(act === 'checkin') checkinOpen();
+  else if(act === 'checkin-save') checkinSave();
+  else if(act === 'remind-am') remindAdd('am');
+  else if(act === 'remind-pm') remindAdd('pm');
+  else if(act === 'story') storyOpen();
+  else if(act === 'story-go') storyGo();
   else if(act === 'relapse') relapse(b.dataset.id);
   else if(act === 'relapse-ok'){ const c = state.counters.find(x => x.id === b.dataset.id); if(c){ c.best = Math.max(c.best || 0, cDays(c)); c.relapses.push(dkey(today())); c.start = dkey(today()); save(); closeSheet(); render(); toast('Tag 0. Steh auf. Weiter.'); } }
   else if(act === 'counter-del') openSheet('<h3>Zähler löschen?</h3><p>Der Zähler und sein Rekord werden gelöscht. Das lässt sich nicht rückgängig machen.</p><div class="row-btns"><button class="btn" data-act="cancel">Abbrechen</button><button class="btn danger" data-act="counter-delok" data-id="' + b.dataset.id + '">Löschen</button></div>');

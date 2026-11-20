@@ -324,6 +324,24 @@ nav.bar button.on{ color:#fff; }
 .coin.big{ width:132px; margin:16px auto 0; border-width:3px; box-shadow:inset 0 0 0 7px #141518, inset 0 0 0 8px rgba(255,255,255,.3), 0 0 50px rgba(255,255,255,.25); }
 .coin.big span{ font-size:52px; }
 .kick{ font-size:10.5px; font-weight:800; letter-spacing:.3em; text-transform:uppercase; color:var(--lamp); }
+
+/* Rot wie die Augen des Wolfs – sparsam, nur für Fortschritt und Belohnung */
+:root{ --red:#e0352d; --red-glow:rgba(224,53,45,.55); }
+.bar b{ background:linear-gradient(90deg, #7a1410, var(--red)); box-shadow:0 0 12px var(--red-glow); }
+.ring .fg{ stroke:var(--red); filter:drop-shadow(0 0 5px var(--red-glow)); }
+.habit .meta .streak, .todo .t small{ color:#ff5a50; }
+.arc .rank b{ color:#ff5a50; }
+.arcgrid i.today{ outline-color:var(--red); }
+.kick{ color:#ff5a50; }
+.coin:not(.lock){ border-color:#c9ccd2; box-shadow:inset 0 0 0 4px #141518, inset 0 0 0 5px rgba(224,53,45,.55), 0 0 16px var(--red-glow); }
+.coin.big{ box-shadow:inset 0 0 0 7px #141518, inset 0 0 0 8px rgba(224,53,45,.7), 0 0 60px var(--red-glow); }
+.counter{ border-color:rgba(224,53,45,.35); }
+.counter .n{ color:#fff; text-shadow:0 0 22px var(--red-glow); }
+.counter .btn:not(.ghost){ background:var(--red); color:#fff; box-shadow:0 0 18px var(--red-glow); }
+nav.bar button.on{ color:#fff; }
+nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a50; }
+.warn{ border-color:rgba(224,53,45,.55); background:rgba(224,53,45,.08); } .warn b{ color:#ff5a50; }
+.goal.won{ border-color:rgba(224,53,45,.5); } .goal.won h4::after{ color:#ff5a50; }
 </style>
 </head>
 <body>

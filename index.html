@@ -308,6 +308,22 @@ nav.bar button.on{ color:#fff; }
 .counter .row-btns{ margin-top:12px; }
 .counter .row-btns .btn{ padding:12px 8px; font-size:11px; letter-spacing:.16em; }
 .sos li{ margin-bottom:10px; }
+
+/* Abzeichen */
+.arc .rank{ margin-top:8px; font-size:12.5px; color:var(--dim); font-weight:600; }
+.arc .rank b{ color:#fff; font-weight:800; }
+.coins{ display:grid; grid-template-columns:repeat(auto-fill, minmax(76px, 1fr)); gap:14px 8px; margin-top:12px; }
+.cb{ display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
+.cb span{ font-size:9.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); line-height:1.25; }
+.coin{ width:60px; aspect-ratio:1; border-radius:50%; display:grid; place-items:center;
+  background:radial-gradient(circle at 32% 28%, #4a4e57 0%, #1c1d21 55%, #0b0b0d 100%);
+  border:2px solid #b8bec8; box-shadow:inset 0 0 0 4px #141518, inset 0 0 0 5px rgba(255,255,255,.28), 0 0 18px rgba(255,255,255,.14); }
+.coin span{ font-family:var(--serif); font-size:24px; font-weight:600; color:#fff; text-shadow:0 1px 0 #000; }
+.coin.lock{ background:#0d0d0f; border:1px dashed rgba(255,255,255,.25); box-shadow:none; }
+.coin.lock span{ color:rgba(255,255,255,.25); }
+.coin.big{ width:132px; margin:16px auto 0; border-width:3px; box-shadow:inset 0 0 0 7px #141518, inset 0 0 0 8px rgba(255,255,255,.3), 0 0 50px rgba(255,255,255,.25); }
+.coin.big span{ font-size:52px; }
+.kick{ font-size:10.5px; font-weight:800; letter-spacing:.3em; text-transform:uppercase; color:var(--lamp); }
 </style>
 </head>
 <body>
@@ -344,12 +360,12 @@ nav.bar button.on{ color:#fff; }
 
 <script>
 'use strict';
-const VERSION = '3.1.0';
+const VERSION = '3.2.0';
 const KEY = 'winterarc_v1';
 const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-const SUGGEST = ['Vor 7 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt aus dem Haus','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Kein Alkohol','Kein Porno','Clean geblieben','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
+const SUGGEST = ['Um 6 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt aus dem Haus','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Kein Alkohol','Kein Porno','Clean geblieben','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
 const QUOTES = [
   'Disziplin schlägt Motivation. Jeden Tag.',
   'Während sie schlafen, arbeitest du.',
@@ -372,11 +388,14 @@ const QUOTES = [
 let state = load();
 function normalize(s){
   if(!s || !Array.isArray(s.habits)) return null;
-  return { arc:s.arc || null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false,
+  const ren = n => n === 'Vor 7 Uhr aufstehen' ? 'Um 6 Uhr aufstehen' : n === 'Vor 7 Uhr aufstehen.' ? 'Um 6 Uhr aufstehen.' : n;
+  s.habits = s.habits.map(h => h && h.name ? Object.assign({}, h, { name:ren(h.name) }) : h);
+  if(Array.isArray(s.rules)) s.rules = s.rules.map(ren);
+  return { arc:s.arc || null, badges:Array.isArray(s.badges) ? s.badges : null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false,
     todos:Array.isArray(s.todos) ? s.todos : [], goals:Array.isArray(s.goals) ? s.goals : [], rules:Array.isArray(s.rules) ? s.rules : [],
     counters:Array.isArray(s.counters) ? s.counters : [], lastBackup:s.lastBackup || null, rev:+s.rev || 0, savedAt:s.savedAt || null };
 }
-function EMPTY(){ return { arc:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[], counters:[], lastBackup:null, rev:0, savedAt:null }; }
+function EMPTY(){ return { arc:null, badges:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[], counters:[], lastBackup:null, rev:0, savedAt:null }; }
 function loadLS(){ try{ return normalize(JSON.parse(localStorage.getItem(KEY) || 'null')); }catch(e){ return null; } }
 function load(){ return loadLS() || EMPTY(); }
 const hasData = s => !!(s && (s.arc || s.habits.length || s.goals.length || s.todos.length || s.counters.length || s.rules.length));
@@ -425,6 +444,8 @@ async function bootStorage(){
     render(); if(restored) toast('Deine Daten wurden wiederhergestellt.');
   } else if(hasData(state) && (!fromDb || state.rev >= fromDb.rev)) idbPut('state', JSON.stringify(state));
   try{ if(navigator.storage && navigator.storage.persist) storagePersisted = await navigator.storage.persist(); }catch(e){}
+  // umbenannte Gewohnheiten u. Ä. gleich dauerhaft speichern
+  try{ if(hasData(state) && localStorage.getItem(KEY) !== JSON.stringify(state)) save(); }catch(e){}
   showSaved();
 }
 let storagePersisted = null;
@@ -446,9 +467,9 @@ const shortDate = d => d.getDate() + '.' + (d.getMonth()+1) + '.';
 /* ---------- Arc ---------- */
 function arcInfo(){
   const a = state.arc; if(!a) return null;
-  const s = fromKey(a.start), e = addDays(s, a.days - 1), t = today();
-  const day = daysBetween(s, t) + 1;   // 1 … days
-  return { start:s, end:e, total:a.days, day, before: day < 1, over: day > a.days, left: Math.max(0, daysBetween(t, e)) };
+  const s = fromKey(a.start), t = today();
+  const day = daysBetween(s, t) + 1;   // läuft ohne Ende
+  return { start:s, day, before: day < 1 };
 }
 // Anteil erledigter fälliger Gewohnheiten an einem Tag (null = nichts fällig)
 function dayScore(d){
@@ -462,14 +483,16 @@ function dayScore(d){
 }
 const perfect = d => { const s = dayScore(d); return s !== null && s >= 1; };
 function arcStats(){
-  const A = arcInfo(); if(!A || A.before) return { perfect:0, streak:0 };
-  const t = today(), last = A.over ? A.end : t;
-  let n = 0;
-  for(let d = new Date(A.start); d <= last; d = addDays(d, 1)) if(perfect(d)) n++;
-  let st = 0, d = new Date(last);
-  if(!A.over && !perfect(d)) d = addDays(d, -1);
+  const A = arcInfo(); if(!A || A.before) return { perfect:0, streak:0, best:0 };
+  const t = today();
+  let n = 0, cur = 0, best = 0;
+  for(let d = new Date(A.start); d <= t; d = addDays(d, 1)){
+    if(perfect(d)){ n++; cur++; best = Math.max(best, cur); } else if(dkey(d) !== dkey(t)) cur = 0;
+  }
+  let st = 0, d = new Date(t);
+  if(!perfect(d)) d = addDays(d, -1);
   while(d >= A.start && perfect(d)){ st++; d = addDays(d, -1); }
-  return { perfect:n, streak:st };
+  return { perfect:n, streak:st, best };
 }
 
 /* ---------- Gewohnheiten ---------- */
@@ -573,6 +596,7 @@ function render(){
   if(setup){ renderSetup(); return; }
   document.querySelectorAll('nav.bar button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   if(tab === 'today') renderToday(); else if(tab === 'week') renderWeek(); else if(tab === 'goals') renderGoals(); else renderStats();
+  setTimeout(badgeCheck, 400);
 }
 
 /* Erster Start: einrichten */
@@ -588,37 +612,64 @@ function renderSetup(){
   $('#view').innerHTML = '<div class="hero"><div class="intro"><div class="kicker">' + new Date().getFullYear() + '</div><h2>Winter Arc.</h2><div class="rule"></div><p>Während die anderen warten, wirst du jemand anderes.</p></div></div><div class="intro">'
     + '<div class="card">'
     + '<div class="field"><label for="su-start">Start</label><input id="su-start" type="date" value="' + setupStart + '"></div>'
-    + '<div class="field"><label>Dauer</label><div class="seg" id="su-days">' + [[30,'30 Tage'],[60,'60 Tage'],[90,'90 Tage'],[0,'Bis Silvester']].map(([v,l]) =>
-        '<button data-v="' + v + '" class="' + ((v === 0 ? setupDays === untilNye() : setupDays === v) ? 'on' : '') + '">' + l + '</button>').join('') + '</div>'
-      + '<p class="note" style="margin:8px 0 0">Ende: ' + longDate(end) + ' ' + end.getFullYear() + ' · ' + setupDays + ' Tage</p></div>'
+    + '<p class="note" style="margin:-4px 0 16px">Kein Enddatum. Der Arc läuft, solange du weitermachst – mit Abzeichen und Rängen auf dem Weg.</p>'
     + '<div class="field"><label for="su-why">Mein Warum <span style="font-weight:500">(freiwillig)</span></label><textarea id="su-why" maxlength="160" placeholder="z. B. Ich will im Frühling stärker, ruhiger und fitter sein.">' + esc(setupWhy) + '</textarea></div>'
     + custom
     + '<button class="btn wide" data-act="arc-go">Arc starten</button>'
     + '</div></div>';
   $('#su-start').onchange = e => { if(e.target.value){ setupStart = e.target.value; if(isNyeSel) setupDays = untilNye(); renderSetup(); } };
   $('#su-why').oninput = e => setupWhy = e.target.value;
-  $('#su-days').onclick = e => { const b = e.target.closest('button'); if(!b) return; const v = +b.dataset.v; isNyeSel = v === 0; setupDays = v || untilNye(); renderSetup(); };
   if($('#su-chips')) $('#su-chips').onclick = e => { const b = e.target.closest('button'); if(!b) return; const s = b.dataset.s; setupPick.has(s) ? setupPick.delete(s) : setupPick.add(s); b.classList.toggle('on'); };
 }
 let isNyeSel = false;
 function untilNye(){ const s = fromKey(setupStart || dkey(today())); let ny = new Date(s.getFullYear(), 11, 31); if(daysBetween(s, ny) < 6) ny = new Date(s.getFullYear()+1, 11, 31); return daysBetween(s, ny) + 1; }
 function arcGo(){
-  state.arc = { start:setupStart, days:Math.max(1, setupDays), why:(setupWhy || '').trim().slice(0,160) };
+  state.arc = { start:setupStart, days:null, why:(setupWhy || '').trim().slice(0,160) };
   if(!state.habits.length) for(const s of SUGGEST) if(setupPick.has(s)) addHabit(s, s === 'Training' ? { mode:'times', times:4 } : null);
   save(); tab = 'today'; viewDay = today(); render(); toast('Tag 1. Keine Ausreden.');
 }
 
+/* ---------- Abzeichen (ohne Ende) ---------- */
+const BADGES = [[1,'Erster Schritt'],[3,'Drei Tage'],[7,'Eine Woche'],[14,'Zwei Wochen'],[21,'Neue Gewohnheit'],[30,'Ein Monat'],[50,'Eiserner Wille'],[75,'Unaufhaltsam'],
+  [100,'Hundert'],[150,'Kalt wie Stahl'],[200,'Unzerbrechlich'],[300,'Dreihundert'],[365,'Ein Jahr'],[500,'Legende'],[730,'Zwei Jahre'],[1000,'Tausend']];
+function badgeList(max){
+  const l = BADGES.slice();
+  for(let y = 3; y * 365 <= (max || 0) + 365; y++) l.push([y * 365, y + ' Jahre']);
+  return l.sort((a, b) => a[0] - b[0]);
+}
+function badgeAt(n){ const l = badgeList(n); let cur = null; for(const b of l) if(n >= b[0]) cur = b; return { cur, next:l.find(b => b[0] > n) }; }
+const coin = (n, cls) => '<div class="coin' + (cls ? ' ' + cls : '') + '"><span>' + n + '</span></div>';
+function earnedBadges(){
+  const out = [], p = arcStats().perfect;
+  for(const [n, name] of badgeList(p)) if(p >= n) out.push({ key:'d:' + n, n, name, what:'perfekte Tage' });
+  for(const c of state.counters){ const m = Math.max(c.best || 0, cDays(c));
+    for(const [n, name] of badgeList(m)) if(m >= n) out.push({ key:'c:' + c.id + ':' + n, n, name, what:(n === 1 ? 'Tag' : 'Tage') + ' clean · ' + c.name }); }
+  return out;
+}
+function badgeCheck(){
+  if(!state.arc || !$('#modal').hidden) return;
+  const all = earnedBadges();
+  if(!state.badges){ state.badges = all.map(b => b.key); save(); return; }
+  const seen = new Set(state.badges), nw = all.filter(b => !seen.has(b.key));
+  if(!nw.length) return;
+  state.badges = [...state.badges, ...nw.map(b => b.key)]; save();
+  const b = nw[nw.length - 1];
+  openSheet('<div style="text-align:center"><div class="kick">Abzeichen freigeschaltet</div>' + coin(b.n, 'big') + '<h3 style="margin:14px 0 4px">' + esc(b.name) + '</h3>'
+    + '<p class="note" style="margin:0">' + b.n + ' ' + esc(b.what) + '</p>'
+    + (nw.length > 1 ? '<p class="note">+ ' + (nw.length - 1) + ' weitere</p>' : '')
+    + '<p style="font-family:var(--serif);font-size:20px;margin:16px 0 0">Das ist erst der Anfang. Weiter.</p></div>'
+    + '<div class="row-btns" style="margin-top:18px"><button class="btn" data-act="cancel">Weiter</button></div>');
+}
+
 function arcCardHtml(){
   const A = arcInfo(), S = arcStats();
-  let head, big, pct;
-  if(A.before){ head = 'Startet bald'; big = 'in ' + (1 - A.day) + (1 - A.day === 1 ? ' Tag' : ' Tagen'); pct = 0; }
-  else if(A.over){ head = 'Geschafft'; big = A.total + ' <small>von ' + A.total + ' Tagen</small>'; pct = 1; }
-  else { head = 'Winter Arc · ' + shortDate(A.start) + ' – ' + shortDate(A.end); big = 'Tag ' + A.day + ' <small>von ' + A.total + '</small>'; pct = A.day / A.total; }
-  return '<div class="arc"><div class="day">' + head + '</div><div class="big">' + big + '</div>'
-    + '<div class="bar"><b style="width:' + Math.round(pct*100) + '%"></b></div>'
-    + '<div class="row"><div><b>' + (A.over ? 0 : A.before ? A.total : A.left) + '</b><span>Tage übrig</span></div><div><b>' + S.perfect + '</b><span>perfekte Tage</span></div><div><b>' + S.streak + '</b><span>perfekt am Stück</span></div></div>'
+  if(A.before) return '<div class="arc"><div class="day">Startet bald</div><div class="big">in ' + (1 - A.day) + (1 - A.day === 1 ? ' Tag' : ' Tagen') + '</div></div>';
+  const { cur, next } = badgeAt(S.perfect), prev = cur ? cur[0] : 0;
+  return '<div class="arc"><div class="day">Winter Arc · seit ' + shortDate(A.start) + A.start.getFullYear() + '</div><div class="big">Tag ' + A.day + '</div>'
+    + '<div class="rank">' + (cur ? 'Rang: <b>' + esc(cur[1]) + '</b> · ' : '') + 'nächstes Abzeichen „' + esc(next[1]) + '“ in ' + (next[0] - S.perfect) + ' perfekten ' + (next[0] - S.perfect === 1 ? 'Tag' : 'Tagen') + '</div>'
+    + '<div class="bar"><b style="width:' + Math.round((S.perfect - prev) / (next[0] - prev) * 100) + '%"></b></div>'
+    + '<div class="row"><div><b>' + S.perfect + '</b><span>perfekte Tage</span></div><div><b>' + S.streak + '</b><span>perfekt am Stück</span></div><div><b>' + S.best + '</b><span>Rekord-Serie</span></div></div>'
     + (state.arc.why ? '<div class="why">' + esc(state.arc.why) + '</div>' : '')
-    + (A.over ? '<div class="add-row"><button class="btn wide" data-act="new-arc">Neu starten</button></div>' : '')
     + '</div>';
 }
 function quoteHtml(){
@@ -699,10 +750,20 @@ function isoWeek(d){
   return Math.ceil(((x - y0) / 864e5 + 1) / 7);
 }
 
+function badgesHtml(){
+  const p = arcStats().perfect;
+  const row = (val, list) => '<div class="coins">' + list.map(([n, name]) => '<div class="cb">' + coin(n, val >= n ? '' : 'lock') + '<span>' + esc(name) + '</span></div>').join('') + '</div>';
+  const upTo = val => { const l = badgeList(val), i = l.findIndex(b => b[0] > val); return l.slice(0, Math.max(6, i + 3)); };
+  let h = '<h2>Abzeichen · Disziplin</h2><div class="card"><div class="note">für perfekte Tage – ' + p + ' bisher</div>' + row(p, upTo(p)) + '</div>';
+  for(const c of state.counters){ const m = Math.max(c.best || 0, cDays(c));
+    h += '<h2>Abzeichen · Clean</h2><div class="card"><div class="note">' + esc(c.name) + ' – Rekord ' + m + (m === 1 ? ' Tag' : ' Tage') + '</div>' + row(m, upTo(m)) + '</div>'; }
+  return h;
+}
 function renderStats(){
   const A = arcInfo(), t = today();
   let grid = '';
-  for(let i=0;i<A.total;i++){
+  const first = Math.max(0, A.day - 140), cells = Math.ceil((A.day - first) / 10) * 10 || 10;
+  for(let i = first; i < first + cells; i++){
     const d = addDays(A.start, i), k = dkey(d);
     if(d > t){ grid += '<i class="fut" title="Tag ' + (i+1) + '"></i>'; continue; }
     const s = dayScore(d);
@@ -710,7 +771,8 @@ function renderStats(){
     grid += '<i data-l="' + l + '" class="' + (k === dkey(t) ? 'today' : '') + '" title="Tag ' + (i+1) + ' · ' + shortDate(d) + (s === null ? '' : ' · ' + Math.round(s*100) + ' %') + '"></i>';
   }
   let html = arcCardHtml()
-    + '<h2>Jeder Tag zählt</h2><div class="card"><div class="note">' + shortDate(A.start) + A.start.getFullYear() + ' – ' + shortDate(A.end) + A.end.getFullYear() + ' · ein Feld = ein Tag</div>'
+    + badgesHtml()
+    + '<h2>Jeder Tag zählt</h2><div class="card"><div class="note">' + (first ? 'Die letzten ' + (A.day - first) + ' Tage' : 'Seit ' + shortDate(A.start) + A.start.getFullYear()) + ' · ein Feld = ein Tag</div>'
     + '<div class="arcgrid">' + grid + '</div>'
     + '<div class="legend">wenig <i style="background:#2a2c31"></i><i style="background:#55585f"></i><i style="background:#9a9da3"></i><i style="background:#fff"></i> perfekt</div></div>';
   const hs = activeHabits();
@@ -803,8 +865,7 @@ function openSettings(){
   const a = state.arc;
   openSheet('<h3>Einstellungen</h3>'
     + (a ? '<div class="field"><label for="s-why">Mein Warum</label><textarea id="s-why" maxlength="160">' + esc(a.why || '') + '</textarea></div>'
-      + '<div class="field"><label>Dauer</label><div class="seg" id="s-len">' + [30,60,90,100].map(v => '<button data-v="' + v + '" class="' + (a.days === v ? 'on' : '') + '">' + v + ' Tage</button>').join('') + '</div>'
-      + '<p class="note" style="margin:8px 0 0">Start: ' + longDate(fromKey(a.start)) + ' ' + fromKey(a.start).getFullYear() + ' · Ende: ' + longDate(arcInfo().end) + ' ' + arcInfo().end.getFullYear() + '</p></div>' : '')
+      + '<p class="note" style="margin:-8px 0 16px">Dabei seit ' + longDate(fromKey(a.start)) + ' ' + fromKey(a.start).getFullYear() + ' · kein Enddatum</p>' : '')
     + '<div class="field"><label>Woche beginnt am</label><div class="seg" id="s-ws"><button data-v="1" class="' + (state.weekStart === 1 ? 'on' : '') + '">Montag</button><button data-v="0" class="' + (state.weekStart === 0 ? 'on' : '') + '">Sonntag</button></div></div>'
     + '<div class="field"><label>Schneefall</label><div class="seg" id="s-snow"><button data-v="1" class="' + (state.snow ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.snow ? 'on' : '') + '">Aus</button></div></div>'
     + '<div class="field"><label>Speicher</label><p class="note" style="margin:0 0 8px">Alles wird sofort doppelt auf diesem Gerät gespeichert, dazu jeden Tag eine Kopie (14 Tage).<br>'
@@ -814,16 +875,20 @@ function openSettings(){
     + '<button class="btn ghost wide" style="margin-top:8px" data-act="snaps">Ältere Kopie wiederherstellen</button>'
     + '<p class="note" style="margin:8px 0 0">Tipp: „Sicherung speichern“ → „In Dateien sichern“ → iCloud Drive. Dann ist sie auch sicher, wenn das Handy weg ist.</p></div>'
     + '<div class="field"><label>App-Version</label><p class="note" style="margin:0 0 8px">Du hast Version ' + VERSION + '. Neue Versionen meldet die App von selbst.</p><button class="btn ghost wide" data-act="check-update">Nach Update suchen</button></div>'
-    + (a ? '<div class="field"><label>Neu anfangen</label><button class="btn danger wide" data-act="new-arc">Neu starten</button><p class="note" style="margin:6px 0 0">Gewohnheiten und Haken bleiben, nur Start und Dauer werden neu festgelegt.</p></div>' : '')
+    + (a ? '<div class="field"><label>Neu anfangen</label><button class="btn danger wide" data-act="new-arc">Bei Tag 1 neu beginnen</button><p class="note" style="margin:6px 0 0">Nur der Tag-Zähler beginnt wieder bei 1. Gewohnheiten, Haken, Ziele, Zähler und Abzeichen bleiben.</p></div>' : '')
     + '<div class="row-btns" style="margin-top:18px"><button class="btn" data-act="cancel">Fertig</button></div>');
   if($('#s-why')) $('#s-why').oninput = e => { state.arc.why = e.target.value.slice(0,160); save(); render(); };
-  if($('#s-len')) $('#s-len').onclick = e => { const b = e.target.closest('button'); if(!b) return; state.arc.days = +b.dataset.v; save(); render(); openSettings(); };
   $('#s-ws').onclick = e => { const b = e.target.closest('button'); if(!b) return; state.weekStart = +b.dataset.v; save(); render(); openSettings(); };
   $('#s-snow').onclick = e => { const b = e.target.closest('button'); if(!b) return; state.snow = b.dataset.v === '1'; save(); render(); openSettings(); };
 }
 function newArc(){
-  openSheet('<h3>Neu starten?</h3><p>Deine Gewohnheiten und alle Haken bleiben erhalten. Du legst nur Start, Dauer und dein Warum neu fest.</p>'
-    + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="new-arc-ok">Neu starten</button></div>');
+  const A = arcInfo();
+  openSheet('<h3>Wirklich neu beginnen?</h3><p>Du bist bei <b>Tag ' + (A ? A.day : 1) + '</b>. Der Tag-Zähler beginnt dann wieder bei 1, und perfekte Tage zählen erst ab heute.</p><p class="note">Gewohnheiten, Haken, Ziele, Clean-Zähler und deine Abzeichen bleiben erhalten.</p>'
+    + '<div class="row-btns"><button class="btn" data-act="cancel">Nein, weitermachen</button><button class="btn danger" data-act="new-arc-2">Ja, weiter</button></div>');
+}
+function newArc2(){
+  openSheet('<h3>Bist du dir sicher?</h3><p>Das lässt sich nicht rückgängig machen.</p>'
+    + '<div class="row-btns"><button class="btn" data-act="cancel">Abbrechen</button><button class="btn danger" data-act="new-arc-ok">Ja, bei Tag 1 beginnen</button></div>');
 }
 async function exportData(){
   const name = 'Winter-Arc-Sicherung-' + dkey(today()) + '.json';
@@ -913,7 +978,7 @@ const GOAL_TEMPLATES = [
     steps:['Alle Ausgaben eines Monats aufschreiben','Unnötige Abos kündigen','Sparziel festlegen','Dauerauftrag aufs Sparkonto einrichten'],
     habits:[['Kein unnötiger Kauf',null]] }
 ];
-const DEFAULT_RULES = ['Vor 7 Uhr aufstehen.','Jeden Tag bewegen – keine Ausnahme.','Kein Zucker, kein Fast Food.','Kein Alkohol.','Jeden Tag lesen oder lernen.','Kalt duschen.','Handy weg ab 22 Uhr.','Keine Ausreden – nur Ergebnisse.','Sag ja zu neuen Leuten und Situationen.','Über deinen Arc redest du nicht. Man sieht ihn.'];
+const DEFAULT_RULES = ['Um 6 Uhr aufstehen.','Jeden Tag bewegen – keine Ausnahme.','Kein Zucker, kein Fast Food.','Kein Alkohol.','Jeden Tag lesen oder lernen.','Kalt duschen.','Handy weg ab 22 Uhr.','Keine Ausreden – nur Ergebnisse.','Sag ja zu neuen Leuten und Situationen.','Über deinen Arc redest du nicht. Man sieht ihn.'];
 
 function renderGoals(){
   const open = state.goals.filter(g => !g.done), won = state.goals.filter(g => g.done);
@@ -998,10 +1063,10 @@ const COUNTER_PRESETS = ['Kein Porno, kein Wichsen','Kein Alkohol','Kein Zocken'
 const cDays = c => Math.max(0, daysBetween(fromKey(c.start), today()));
 function countersHtml(){
   return state.counters.map(c => {
-    const n = cDays(c), best = Math.max(c.best || 0, n), next = MILESTONES.find(m => m > n) || n + 30, prev = [...MILESTONES].reverse().find(m => m <= n) || 0;
+    const n = cDays(c), best = Math.max(c.best || 0, n), ba = badgeAt(n), next = ba.next[0], prev = ba.cur ? ba.cur[0] : 0;
     return '<div class="counter"><div class="k">Clean · ' + esc(c.name) + '</div>'
       + '<div class="n">' + n + ' <small>' + (n === 1 ? 'Tag' : 'Tage') + '</small></div>'
-      + '<div class="sub">Rekord ' + best + ' ' + (best === 1 ? 'Tag' : 'Tage') + ' · nächstes Ziel: ' + next + (next === 1 ? ' Tag' : ' Tage') + '</div>'
+      + '<div class="sub">Rekord ' + best + ' ' + (best === 1 ? 'Tag' : 'Tage') + ' · nächstes Abzeichen „' + esc(ba.next[1]) + '“ bei ' + next + (next === 1 ? ' Tag' : ' Tagen') + '</div>'
       + '<div class="bar"><b style="width:' + Math.round((n - prev) / (next - prev) * 100) + '%"></b></div>'
       + '<div class="row-btns"><button class="btn" data-act="sos" data-id="' + c.id + '">Drang? Notfallplan</button><button class="btn ghost" data-act="relapse" data-id="' + c.id + '">Rückfall</button></div></div>';
   }).join('');
@@ -1081,6 +1146,9 @@ function whatsNew(){
   let seen = null; try{ seen = localStorage.getItem('winterarc_seen_ver'); localStorage.setItem('winterarc_seen_ver', VERSION); }catch(e){}
   if(!seen || seen === VERSION || !state.arc) return;
   openSheet('<h3>Neu in ' + VERSION + '</h3><ul class="news">'
+    + '<li><b>Ohne Ende:</b> Dein Arc hat kein Enddatum mehr. Er läuft, solange du weitermachst.</li>'
+    + '<li><b>Abzeichen und Ränge:</b> für perfekte Tage und für jeden Clean-Zähler – von „Erster Schritt“ bis „Tausend“ und darüber hinaus. Zu sehen unter „Mein Arc“.</li>'
+    + '<li><b>Um 6 Uhr aufstehen</b> statt vor 7. „Neu beginnen“ fragt jetzt zweimal nach.</li>'
     + '<li><b>Sicher speichern:</b> alles wird jetzt doppelt gespeichert, dazu jeden Tag eine Kopie. Sicherung direkt in iCloud. „✓ Gespeichert“ steht unten auf jeder Seite.</li>'
     + '<li><b>Clean-Zähler:</b> zählt deine Tage ohne Porno (oder Alkohol, Zocken …), mit Rekord und Notfallplan, wenn der Drang kommt. Neue Ziel-Vorlage „Frei von Pornos“.</li>'
     + '<li><b>Ziele:</b> eigenes Ziel mit Warum und Schritten – mit Vorlagen wie „Eine Freundin finden“.</li>'
@@ -1146,10 +1214,12 @@ document.addEventListener('click', e => {
   else if(act === 'sos') sos(b.dataset.id);
   else if(act === 'relapse') relapse(b.dataset.id);
   else if(act === 'relapse-ok'){ const c = state.counters.find(x => x.id === b.dataset.id); if(c){ c.best = Math.max(c.best || 0, cDays(c)); c.relapses.push(dkey(today())); c.start = dkey(today()); save(); closeSheet(); render(); toast('Tag 0. Steh auf. Weiter.'); } }
-  else if(act === 'counter-del'){ state.counters = state.counters.filter(x => x.id !== b.dataset.id); save(); closeSheet(); render(); }
+  else if(act === 'counter-del') openSheet('<h3>Zähler löschen?</h3><p>Der Zähler und sein Rekord werden gelöscht. Das lässt sich nicht rückgängig machen.</p><div class="row-btns"><button class="btn" data-act="cancel">Abbrechen</button><button class="btn danger" data-act="counter-delok" data-id="' + b.dataset.id + '">Löschen</button></div>');
+  else if(act === 'counter-delok'){ state.counters = state.counters.filter(x => x.id !== b.dataset.id); save(); closeSheet(); render(); }
   else if(act === 'do-update') doUpdate();
   else if(act === 'new-arc') newArc();
-  else if(act === 'new-arc-ok'){ setupWhy = state.arc ? state.arc.why : ''; setupStart = dkey(today()); setupDays = state.arc ? state.arc.days : 90; isNyeSel = false; state.arc = null; save(); closeSheet(); window.scrollTo(0,0); render(); }
+  else if(act === 'new-arc-2') newArc2();
+  else if(act === 'new-arc-ok'){ if(state.arc){ state.arc.start = dkey(today()); save(); } closeSheet(); window.scrollTo(0,0); render(); toast('Tag 1. Keine Ausreden.'); }
 });
 document.querySelectorAll('nav.bar button').forEach(b => b.addEventListener('click', () => { tab = b.dataset.tab; window.scrollTo(0,0); render(); }));
 $('#add-top').onclick = () => tab === 'goals' ? goalEdit(null) : editHabit(null);

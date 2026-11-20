@@ -395,6 +395,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 .code-box{ font-family:'JetBrains Mono', ui-monospace, Menlo, monospace; font-size:17px; letter-spacing:.06em; text-align:center; padding:16px 10px; margin:14px 0;
   border:1px solid rgba(224,53,45,.55); border-radius:var(--r); background:#050506; user-select:all; -webkit-user-select:all; word-break:break-all; }
+.mut .undo{ margin-left:8px; color:#fff; text-decoration:underline; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
 </style>
 </head>
 <body>
@@ -431,7 +432,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.5.0';
+const VERSION = '3.5.1';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
@@ -519,6 +520,7 @@ async function bootStorage(){
     render(); if(restored) toast('Deine Daten wurden wiederhergestellt.');
   } else if(hasData(state) && (!fromDb || state.rev >= fromDb.rev)) idbPut('state', JSON.stringify(state));
   try{ if(navigator.storage && navigator.storage.persist) storagePersisted = await navigator.storage.persist(); }catch(e){}
+  try{ if(!localStorage.getItem('winterarc_mutreset1')){ localStorage.setItem('winterarc_mutreset1', '1'); if(state.mut && ((state.mut.level || 1) > 1 || Object.keys(state.mut.done || {}).length)){ state.mut = { level:1, done:{} }; render(); } } }catch(e){}
   // umbenannte Gewohnheiten u. Ä. gleich dauerhaft speichern
   try{ if(hasData(state) && localStorage.getItem(KEY) !== JSON.stringify(state)) save(); }catch(e){}
   showSaved();
@@ -979,7 +981,7 @@ function openSettings(){
     + '<div class="field"><label>Erinnerung im Kalender</label><p class="note" style="margin:0 0 8px">Legt einen täglichen Termin mit Hinweis in deinem iPhone-Kalender an.</p>'
       + '<div class="remind"><input id="r-am" type="time" value="' + state.remind.am + '"><button class="btn ghost" data-act="remind-am">Morgens eintragen</button></div>'
       + '<div class="remind"><input id="r-pm" type="time" value="' + state.remind.pm + '"><button class="btn ghost" data-act="remind-pm">Abends eintragen</button></div></div>'
-    + '<div class="field"><label>Mut-Challenge</label><div class="seg" id="s-mut"><button data-v="1" class="' + (state.mutOn ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.mutOn ? 'on' : '') + '">Aus</button></div></div>'
+    + '<div class="field"><label>Mut-Challenge · Stufe ' + (state.mut.level || 1) + '</label><button class="mini-btn" style="margin:-4px 0 8px" data-act="mut-reset">Auf Stufe 1 zurücksetzen</button><div class="seg" id="s-mut"><button data-v="1" class="' + (state.mutOn ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.mutOn ? 'on' : '') + '">Aus</button></div></div>'
     + '<div class="field"><label>Schneefall</label><div class="seg" id="s-snow"><button data-v="1" class="' + (state.snow ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.snow ? 'on' : '') + '">Aus</button></div></div>'
     + cloudSettingsHtml()
     + '<div class="field"><label>Speicher</label><p class="note" style="margin:0 0 8px">Alles wird sofort doppelt auf diesem Gerät gespeichert, dazu jeden Tag eine Kopie (14 Tage).<br>'
@@ -1289,7 +1291,7 @@ function mutHtml(){
   const T = mutToday(), done = state.mut.done[dkey(today())] !== undefined, L = state.mut.level || 1;
   return '<div class="mut"><div class="k">Mut-Challenge · Stufe ' + Math.min(L - (done ? 1 : 0), 999) + (L > MUT.length ? ' · Meister' : '') + '</div>'
     + '<div class="t">' + esc(MUT[T.idx]) + '</div>'
-    + (done ? '<div class="ok">✓ Geschafft. Morgen kommt Stufe ' + L + '.</div>'
+    + (done ? '<div class="ok">✓ Geschafft. Morgen kommt Stufe ' + L + '. <button class="undo" data-act="mut-undo">Rückgängig</button></div>'
       : '<div class="row-btns"><button class="btn" data-act="mut-done">Geschafft</button><button class="btn ghost" data-act="mut-swap">Andere</button></div>')
     + '</div>';
 }
@@ -1664,6 +1666,9 @@ document.addEventListener('click', e => {
   else if(act === 'sos-quit'){ closeSheet(); toast('Abgebrochen. Du schaffst das nächste Mal.'); }
   else if(act === 'wolf-info') wolfInfo();
   else if(act === 'mut-done'){ const T = mutToday(); state.mut.done[dkey(today())] = T.idx; state.mut.level = (state.mut.level || 1) + 1; save(); render(); toast('Mutig. Genau so.'); }
+  else if(act === 'mut-undo'){ const k = dkey(today()); if(state.mut.done[k] !== undefined){ delete state.mut.done[k]; state.mut.level = Math.max(1, (state.mut.level || 1) - 1); save(); render(); toast('Rückgängig gemacht.'); } }
+  else if(act === 'mut-reset') openSheet('<h3>Mut-Challenge zurücksetzen?</h3><p>Du startest wieder bei Stufe 1.</p><div class="row-btns"><button class="btn" data-act="cancel">Abbrechen</button><button class="btn danger" data-act="mut-reset-ok">Auf Stufe 1</button></div>');
+  else if(act === 'mut-reset-ok'){ state.mut = { level:1, done:{} }; save(); closeSheet(); render(); toast('Mut-Challenge: Stufe 1.'); }
   else if(act === 'mut-swap'){ const L = Math.min(state.mut.level || 1, MUT.length), lo = Math.max(0, L - 5), cur = mutToday().idx; let i = cur; for(let n = 0; n < 10 && i === cur; n++) i = lo + Math.floor(Math.random() * (L - lo)); state.mut.today.idx = i; save(); render(); }
   else if(act === 'checkin') checkinOpen();
   else if(act === 'checkin-save') checkinSave();

@@ -63,7 +63,7 @@ input,select,textarea{ font:inherit; color:var(--text); }
 body.no-snow #snow{ display:none; }
 
 .serif{ font-family:var(--serif); }
-header.top{ display:flex; align-items:center; gap:6px; margin-bottom:18px; }
+header.top{ position:relative; z-index:2; display:flex; align-items:center; gap:6px; margin-bottom:18px; }
 header.top h1{ font-family:var(--serif); font-size:26px; font-weight:500; letter-spacing:.22em; text-transform:uppercase; margin:0; flex:1; display:flex; align-items:center; gap:10px; }
 header.top h1 svg{ display:none; }
 .icon-btn{ width:40px; height:40px; border-radius:50%; display:grid; place-items:center; color:var(--ice2); }
@@ -228,10 +228,74 @@ nav.bar button.on{ color:#fff; }
 .intro .rule{ width:120px; height:1px; margin:0 auto 16px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); }
 .intro p{ color:var(--dim); margin:0 0 26px; font-family:var(--serif); font-size:20px; font-style:italic; }
 .intro .card{ text-align:left; }
+
+/* Hintergrundbild */
+#bgimg{ position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:linear-gradient(180deg, rgba(5,5,6,.92) 0%, rgba(5,5,6,.75) 45%, rgba(5,5,6,.35) 100%), url(img/bg-tall.webp) center bottom / cover no-repeat; }
+@media (min-aspect-ratio: 1/1){ #bgimg{ background:linear-gradient(180deg, rgba(5,5,6,.92) 0%, rgba(5,5,6,.7) 50%, rgba(5,5,6,.4) 100%), url(img/bg-wide.webp) center bottom / cover no-repeat; } }
+
+/* Bild des Tages */
+.mood{ position:relative; margin-top:22px; aspect-ratio:4/3; border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
+  background:#000 center / cover no-repeat; display:flex; align-items:flex-end; }
+.mood::before{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.85) 100%); }
+.mood-txt{ position:relative; padding:18px; width:100%; text-align:center; font-family:var(--serif); font-size:24px; line-height:1.2; font-weight:500; }
+.mood-txt b{ display:block; font-family:'Manrope', sans-serif; font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:rgba(255,255,255,.7); font-weight:700; margin-bottom:6px; }
+
+/* Startbild */
+.hero{ position:relative; margin:-70px -16px 0; height:min(68vh, 560px); background:url(img/hero.webp) center 30% / cover no-repeat; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; text-align:center; padding:0 20px 10px; }
+.hero::before{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(5,5,6,.55) 0%, rgba(5,5,6,0) 30%, rgba(5,5,6,.2) 60%, #050506 100%); }
+.hero > *{ position:relative; }
+.intro{ padding-top:0; }
+
+/* Update */
+.update{ position:fixed; left:12px; right:12px; top:calc(10px + env(safe-area-inset-top)); z-index:70; background:#fff; color:#050506; border-radius:var(--r);
+  padding:12px 12px 12px 16px; display:flex; align-items:center; gap:10px; box-shadow:0 10px 40px rgba(0,0,0,.6); max-width:560px; margin:0 auto; }
+.update span{ flex:1; font-size:13.5px; font-weight:700; }
+.update button{ background:#050506; color:#fff; padding:10px 12px; border-radius:var(--r); font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+.update[hidden]{ display:none; }
+.news{ margin:0; padding-left:20px; } .news li{ margin-bottom:8px; }
+
+/* Aufgaben */
+.add-line{ display:flex; gap:8px; }
+.add-line input{ flex:1; min-width:0; padding:12px; border-radius:var(--r); border:1px solid var(--line); background:rgba(5,5,6,.7); font-size:16px; color-scheme:dark; }
+.add-line button{ width:46px; flex:none; border-radius:var(--r); background:#fff; color:#050506; font-size:22px; font-weight:700; }
+.todo{ display:flex; align-items:center; gap:12px; padding:11px 4px 11px 12px; border-bottom:1px solid var(--line); }
+.todo .t{ flex:1; min-width:0; overflow-wrap:anywhere; font-weight:600; }
+.todo .t small{ display:block; color:var(--lamp); font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+.todo.done .t{ color:var(--dim); text-decoration:line-through; }
+.tbox{ width:24px; height:24px; flex:none; border:1.5px solid rgba(255,255,255,.55); border-radius:2px; display:grid; place-items:center; }
+.todo.done .tbox, .step.done .tbox{ background:#fff; border-color:#fff; }
+.todo.done .tbox::after, .step.done .tbox::after{ content:''; width:9px; height:5px; border:solid #050506; border-width:0 0 2.5px 2.5px; transform:rotate(-45deg) translate(1px,-1px); }
+.x{ width:34px; height:34px; flex:none; color:var(--dim); font-size:20px; line-height:1; }
+.todos{ background:var(--panel); border:1px solid var(--line); border-radius:var(--r); margin-top:8px; }
+.todos:empty{ display:none; }
+
+/* Ziele */
+.goal{ background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:16px; }
+.goal .gt{ display:flex; align-items:flex-start; gap:8px; }
+.goal .gt h4{ flex:1; margin:0; font-family:var(--serif); font-weight:500; font-size:26px; line-height:1.1; }
+.goal .gwhy{ font-family:var(--serif); font-style:italic; color:var(--dim); font-size:17px; margin-top:4px; }
+.goal .gmeta{ display:flex; justify-content:space-between; color:var(--dim); font-size:10.5px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; margin-top:12px; }
+.goal .bar{ margin:6px 0 8px; }
+.step{ display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid var(--line); cursor:pointer; }
+.step .t{ flex:1; min-width:0; overflow-wrap:anywhere; font-size:15px; }
+.step.done .t{ color:var(--dim); text-decoration:line-through; }
+.goal .add-line{ margin-top:10px; }
+.goal .add-line input{ padding:9px 10px; font-size:15px; }
+.goal .add-line button{ width:40px; font-size:19px; }
+.goal.won{ border-color:rgba(242,200,121,.5); }
+.goal.won h4::after{ content:' ✓'; color:var(--lamp); }
+.rules{ counter-reset:r; background:var(--panel); border:1px solid var(--line); border-radius:var(--r); }
+.rule-i{ display:flex; align-items:center; gap:12px; padding:12px 4px 12px 14px; border-bottom:1px solid var(--line); counter-increment:r; }
+.rule-i::before{ content:counter(r, upper-roman); font-family:var(--serif); font-size:20px; color:var(--dim); min-width:30px; }
+.rule-i .t{ flex:1; font-family:var(--serif); font-size:20px; line-height:1.2; }
+.mini-btn{ font-size:10.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); padding:6px 0; }
 </style>
 </head>
 <body>
+<div id="bgimg" aria-hidden="true"></div>
 <div id="snow" aria-hidden="true"></div>
+<div class="update" id="update" hidden><span id="update-txt"></span><button data-act="do-update">Aktualisieren</button></div>
 <div class="wrap">
   <header class="top">
     <h1 id="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5M4 10.2l3.8-.7L6.5 6M20 13.8l-3.8.7 1.3 3.5M4 13.8l3.8.7L6.5 18M20 10.2l-3.8-.7L17.5 6"/></svg><span>Winter Arc</span></h1>
@@ -251,6 +315,8 @@ nav.bar button.on{ color:#fff; }
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>Heute</button>
   <button data-tab="week">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Woche</button>
+  <button data-tab="goals">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Ziele</button>
   <button data-tab="stats">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-10 4 6 3-4 5 8z"/></svg>Mein Arc</button>
 </nav>
@@ -260,12 +326,12 @@ nav.bar button.on{ color:#fff; }
 
 <script>
 'use strict';
-const VERSION = '2.0.0';
+const VERSION = '3.0.0';
 const KEY = 'winterarc_v1';
 const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-const SUGGEST = ['Vor 7 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
+const SUGGEST = ['Vor 7 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt aus dem Haus','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Kein Alkohol','Kein Porno','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
 const QUOTES = [
   'Disziplin schlägt Motivation. Jeden Tag.',
   'Während sie schlafen, arbeitest du.',
@@ -289,9 +355,10 @@ let state = load();
 function load(){
   try{
     const s = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if(s && Array.isArray(s.habits)) return { arc:s.arc || null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false };
+    if(s && Array.isArray(s.habits)) return { arc:s.arc || null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false,
+      todos:Array.isArray(s.todos) ? s.todos : [], goals:Array.isArray(s.goals) ? s.goals : [], rules:Array.isArray(s.rules) ? s.rules : [] };
   }catch(e){}
-  return { arc:null, habits:[], marks:{}, weekStart:1, snow:true };
+  return { arc:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[] };
 }
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(state)); }
@@ -436,9 +503,10 @@ function render(){
   const setup = !state.arc;
   document.querySelector('nav.bar').style.display = setup ? 'none' : '';
   $('#add-top').style.visibility = setup ? 'hidden' : '';
+  $('#title').style.visibility = setup ? 'hidden' : '';
   if(setup){ renderSetup(); return; }
   document.querySelectorAll('nav.bar button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
-  if(tab === 'today') renderToday(); else if(tab === 'week') renderWeek(); else renderStats();
+  if(tab === 'today') renderToday(); else if(tab === 'week') renderWeek(); else if(tab === 'goals') renderGoals(); else renderStats();
 }
 
 /* Erster Start: einrichten */
@@ -451,7 +519,7 @@ function renderSetup(){
   const custom = state.habits.length ? '' :
     '<div class="field"><label>Womit startest du? (später änderbar)</label><div class="chips" id="su-chips">'
     + SUGGEST.map(s => '<button data-s="' + esc(s) + '" class="' + (setupPick.has(s) ? 'on' : '') + '">' + esc(s) + '</button>').join('') + '</div></div>';
-  $('#view').innerHTML = '<div class="intro"><div class="kicker">' + new Date().getFullYear() + '</div><h2>Winter Arc.</h2><div class="rule"></div><p>Während die anderen warten, wirst du jemand anderes.</p>'
+  $('#view').innerHTML = '<div class="hero"><div class="intro"><div class="kicker">' + new Date().getFullYear() + '</div><h2>Winter Arc.</h2><div class="rule"></div><p>Während die anderen warten, wirst du jemand anderes.</p></div></div><div class="intro">'
     + '<div class="card">'
     + '<div class="field"><label for="su-start">Start</label><input id="su-start" type="date" value="' + setupStart + '"></div>'
     + '<div class="field"><label>Dauer</label><div class="seg" id="su-days">' + [[30,'30 Tage'],[60,'60 Tage'],[90,'90 Tage'],[0,'Bis Silvester']].map(([v,l]) =>
@@ -489,7 +557,7 @@ function arcCardHtml(){
 }
 function quoteHtml(){
   const n = Math.floor(today() / 864e5);
-  return '<p class="quote"><b>Regel für heute</b>' + QUOTES[n % QUOTES.length] + '</p>';
+  return '<div class="mood" style="background-image:url(img/mood/' + (n % 6 + 1) + '.webp)"><div class="mood-txt"><b>Regel für heute</b>' + QUOTES[n % QUOTES.length] + '</div></div>';
 }
 
 function emptyHtml(){
@@ -504,7 +572,7 @@ function renderToday(){
   html += '<div class="daynav"><button class="icon-btn" data-act="prev" aria-label="Vorheriger Tag">' + ARROW_L + '</button>'
     + '<div class="lbl"><b>' + label + '</b><span>' + (isToday ? longDate(viewDay) : 'Nachtragen') + '</span></div>'
     + '<button class="icon-btn" data-act="next" aria-label="Nächster Tag"' + (isToday ? ' disabled' : '') + '>' + ARROW_R + '</button></div>';
-  if(!hs.length){ $('#view').innerHTML = html + '<div style="height:16px"></div>' + emptyHtml(); return; }
+  if(!hs.length){ $('#view').innerHTML = html + '<div style="height:16px"></div>' + emptyHtml() + (isToday ? todosHtml() : ''); bindTodoInput(); return; }
 
   const due = [], free = [];
   for(const h of hs){
@@ -519,7 +587,9 @@ function renderToday(){
   html += '<div class="list">' + due.map(h => habitRow(h, k)).join('') + '</div>';
   if(free.length) html += '<h2>' + (isToday ? 'Heute frei' : 'An diesem Tag frei') + '</h2><div class="list">' + free.map(h => habitRow(h, k, true)).join('') + '</div>';
   html += '<div class="add-row"><button class="btn ghost wide" data-act="add">+ Gewohnheit</button></div>';
+  if(isToday) html += todosHtml();
   $('#view').innerHTML = html;
+  bindTodoInput();
 }
 function habitRow(h, k, off){
   const done = isDone(h, k);
@@ -673,6 +743,7 @@ function openSettings(){
     + '<div class="field"><label>Schneefall</label><div class="seg" id="s-snow"><button data-v="1" class="' + (state.snow ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.snow ? 'on' : '') + '">Aus</button></div></div>'
     + '<div class="field"><label>Sicherung</label><p class="note" style="margin:0 0 8px">Die Daten liegen nur auf diesem Gerät. Lade ab und zu eine Sicherung herunter.</p>'
     + '<div class="row-btns"><button class="btn ghost" data-act="export">Speichern</button><button class="btn ghost" data-act="import">Laden</button></div></div>'
+    + '<div class="field"><label>App-Version</label><p class="note" style="margin:0 0 8px">Du hast Version ' + VERSION + '. Neue Versionen meldet die App von selbst.</p><button class="btn ghost wide" data-act="check-update">Nach Update suchen</button></div>'
     + (a ? '<div class="field"><label>Neu anfangen</label><button class="btn danger wide" data-act="new-arc">Neu starten</button><p class="note" style="margin:6px 0 0">Gewohnheiten und Haken bleiben, nur Start und Dauer werden neu festgelegt.</p></div>' : '')
     + '<div class="row-btns" style="margin-top:18px"><button class="btn" data-act="cancel">Fertig</button></div>');
   if($('#s-why')) $('#s-why').oninput = e => { state.arc.why = e.target.value.slice(0,160); save(); render(); };
@@ -705,12 +776,157 @@ function importData(){
         state.habits.push({ id:String(h.id), name:String(h.name).slice(0,60), color:/^#[0-9a-f]{6}$/i.test(h.color) ? h.color : COLORS[0],
           mode:['daily','days','times'].includes(h.mode) ? h.mode : 'daily', days:Array.isArray(h.days) ? h.days.map(Number).filter(n => n >= 0 && n < 7) : [1,2,3,4,5],
           times:Math.min(7, Math.max(1, +h.times || 3)), created:okDate(h.created) ? h.created : dkey(today()) });
+      if(Array.isArray(s.todos)) for(const t of s.todos) if(t && t.id && t.text && !state.todos.some(x => x.id === t.id))
+        state.todos.push({ id:String(t.id), text:String(t.text).slice(0,120), created:okDate(t.created) ? t.created : dkey(today()), done:okDate(t.done) ? t.done : null });
+      if(Array.isArray(s.goals)) for(const g of s.goals) if(g && g.id && g.title && !state.goals.some(x => x.id === g.id))
+        state.goals.push({ id:String(g.id), title:String(g.title).slice(0,80), why:String(g.why || '').slice(0,200), created:okDate(g.created) ? g.created : dkey(today()), done:okDate(g.done) ? g.done : null,
+          steps:Array.isArray(g.steps) ? g.steps.filter(x => x && x.text).map(x => ({ id:String(x.id || uid()), text:String(x.text).slice(0,100), done:okDate(x.done) ? x.done : null })) : [] });
+      if(Array.isArray(s.rules)) for(const r of s.rules) if(typeof r === 'string' && r && !state.rules.includes(r)) state.rules.push(r.slice(0,100));
       for(const k in s.marks){ if(!okDate(k) || !Array.isArray(s.marks[k])) continue;
         state.marks[k] = [...new Set([...(state.marks[k] || []), ...s.marks[k].map(String)])]; }
       save(); closeSheet(); render(); toast('Sicherung geladen.');
     }catch(e){ toast('Diese Datei ist keine gültige Sicherung.'); }
   };
   inp.click();
+}
+
+/* ---------- Aufgaben ---------- */
+function todosHtml(){
+  const tk = dkey(today());
+  const open = state.todos.filter(t => !t.done);
+  const doneToday = state.todos.filter(t => t.done === tk);
+  const ago = t => { const n = daysBetween(fromKey(t.created), today()); return n <= 0 ? '' : n === 1 ? 'seit gestern offen' : 'seit ' + n + ' Tagen offen'; };
+  const row = t => '<div class="todo' + (t.done ? ' done' : '') + '"><button class="tbox" data-act="todo-toggle" data-id="' + t.id + '" aria-label="erledigt"></button>'
+    + '<div class="t">' + esc(t.text) + (!t.done && ago(t) ? '<small>' + ago(t) + '</small>' : '') + '</div>'
+    + '<button class="x" data-act="todo-del" data-id="' + t.id + '" aria-label="löschen">×</button></div>';
+  return '<h2>Aufgaben · ' + open.length + ' offen</h2>'
+    + '<div class="add-line"><input id="todo-in" type="text" maxlength="120" placeholder="Was musst du erledigen?" enterkeyhint="done"><button data-act="todo-add" aria-label="Aufgabe hinzufügen">+</button></div>'
+    + '<div class="todos">' + open.map(row).join('') + doneToday.map(row).join('') + '</div>';
+}
+function bindTodoInput(){
+  const i = $('#todo-in'); if(!i) return;
+  i.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); todoAdd(); } });
+}
+function todoAdd(){
+  const i = $('#todo-in'), v = (i && i.value || '').trim(); if(!v){ if(i) i.focus(); return; }
+  state.todos.push({ id:uid(), text:v.slice(0,120), created:dkey(today()), done:null });
+  save(); render(); const n = $('#todo-in'); if(n) n.focus();
+}
+
+/* ---------- Ziele und Regeln ---------- */
+const GOAL_TEMPLATES = [
+  { title:'Eine Freundin finden', why:'Ich will jemanden an meiner Seite – und dafür der beste Mann werden, der ich sein kann.',
+    steps:['Frisur und Bart auf Vordermann bringen','Zwei Outfits kaufen, die richtig gut sitzen','Einem Verein, Kurs oder einer Sportgruppe beitreten','Jede Woche mit mindestens einer neuen Person ins Gespräch kommen','Dating-Profil mit guten, echten Fotos erstellen','Eine Frau nach ihrer Nummer fragen','Erstes Date ausmachen'],
+    habits:[['Jemanden Neues ansprechen',{ mode:'times', times:3 }],['Gepflegt aus dem Haus',null],['Rausgehen statt zocken',{ mode:'times', times:3 }],['Training',{ mode:'times', times:4 }]] },
+  { title:'In Form kommen', why:'Ich will im Frühling stärker und fitter sein als je zuvor.',
+    steps:['Startgewicht und Maße aufschreiben','Trainingsplan festlegen','Ernährung planen: genug Eiweiß, wenig Zucker','Vier Wochen ohne Trainingsausfall','Fortschrittsfoto nach 30 Tagen'],
+    habits:[['Training',{ mode:'times', times:4 }],['10.000 Schritte',null],['Kein Zucker',null]] },
+  { title:'Mein Leben in Ordnung bringen', why:'Kein Chaos mehr. Ich habe alles im Griff.',
+    steps:['Zimmer oder Wohnung komplett ausmisten','Alle offenen Briefe und Rechnungen erledigen','Wichtige Termine machen (Arzt, Amt …)','Feste Schlafenszeit festlegen','Alles Offene aufschreiben – und abarbeiten'],
+    habits:[['Bett machen',null],['Aufgaben-Liste abarbeiten',null],['Kein Handy nach 22 Uhr',null]] },
+  { title:'Mehr Geld auf dem Konto', why:'Ich will Rücklagen statt Sorgen.',
+    steps:['Alle Ausgaben eines Monats aufschreiben','Unnötige Abos kündigen','Sparziel festlegen','Dauerauftrag aufs Sparkonto einrichten'],
+    habits:[['Kein unnötiger Kauf',null]] }
+];
+const DEFAULT_RULES = ['Vor 7 Uhr aufstehen.','Jeden Tag bewegen – keine Ausnahme.','Kein Zucker, kein Fast Food.','Kein Alkohol.','Jeden Tag lesen oder lernen.','Kalt duschen.','Handy weg ab 22 Uhr.','Keine Ausreden – nur Ergebnisse.','Sag ja zu neuen Leuten und Situationen.','Über deinen Arc redest du nicht. Man sieht ihn.'];
+
+function renderGoals(){
+  const open = state.goals.filter(g => !g.done), won = state.goals.filter(g => g.done);
+  let html = '<h2 style="margin-top:4px">Meine Ziele</h2>';
+  if(!state.goals.length) html += '<div class="empty"><b>Was willst du erreichen?</b>Ein Ziel, ein Warum, ein paar Schritte. Dann jeden Tag einen davon.<div class="add-row"><button class="btn" data-act="goal-new">+ Ziel setzen</button></div></div>';
+  html += '<div class="list">' + open.map(goalHtml).join('') + '</div>';
+  if(state.goals.length) html += '<div class="add-row"><button class="btn ghost wide" data-act="goal-new">+ Neues Ziel</button></div>';
+  if(won.length) html += '<h2>Erreicht</h2><div class="list">' + won.map(goalHtml).join('') + '</div>';
+  html += '<h2>Meine Regeln</h2>';
+  if(state.rules.length) html += '<div class="rules">' + state.rules.map((r, i) => '<div class="rule-i"><div class="t">' + esc(r) + '</div><button class="x" data-act="rule-del" data-i="' + i + '" aria-label="Regel löschen">×</button></div>').join('') + '</div>';
+  else html += '<div class="empty" style="padding:20px 16px">Ein Arc ohne Regeln ist nur ein Vorsatz.<div class="add-row"><button class="btn" data-act="rules-default">Die 10 Regeln übernehmen</button></div></div>';
+  html += '<div class="add-line" style="margin-top:8px"><input id="rule-in" type="text" maxlength="100" placeholder="Eigene Regel …" enterkeyhint="done"><button data-act="rule-add" aria-label="Regel hinzufügen">+</button></div>';
+  $('#view').innerHTML = html;
+  const ri = $('#rule-in'); if(ri) ri.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); ruleAdd(); } });
+  document.querySelectorAll('.step-in').forEach(i => i.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); stepAdd(i.dataset.id); } }));
+}
+function goalHtml(g){
+  const n = g.steps.length, d = g.steps.filter(x => x.done).length;
+  return '<div class="goal' + (g.done ? ' won' : '') + '"><div class="gt"><h4>' + esc(g.title) + '</h4><button class="x" data-act="goal-edit" data-id="' + g.id + '" aria-label="Ziel bearbeiten">✎</button></div>'
+    + (g.why ? '<div class="gwhy">' + esc(g.why) + '</div>' : '')
+    + (n ? '<div class="gmeta"><span>' + d + ' von ' + n + ' Schritten</span><span>' + Math.round(d/n*100) + ' %</span></div><div class="bar"><b style="width:' + Math.round(d/n*100) + '%"></b></div>' : '')
+    + g.steps.map(x => '<div class="step' + (x.done ? ' done' : '') + '" data-act="step-toggle" data-id="' + g.id + '" data-s="' + x.id + '"><span class="tbox"></span><span class="t">' + esc(x.text) + '</span></div>').join('')
+    + (g.done ? '<p class="note" style="margin:10px 0 0">Erreicht am ' + longDate(fromKey(g.done)) + ' ' + fromKey(g.done).getFullYear() + '</p>'
+      : '<div class="add-line"><input class="step-in" data-id="' + g.id + '" type="text" maxlength="100" placeholder="Nächster Schritt …" enterkeyhint="done"><button data-act="step-add" data-id="' + g.id + '" aria-label="Schritt hinzufügen">+</button></div>'
+      + (n && d === n ? '<div class="add-row"><button class="btn wide" data-act="goal-won" data-id="' + g.id + '">Ziel erreicht</button></div>' : ''))
+    + '</div>';
+}
+function stepAdd(id){
+  const g = state.goals.find(x => x.id === id), i = document.querySelector('.step-in[data-id="' + id + '"]');
+  const v = (i && i.value || '').trim(); if(!g || !v){ if(i) i.focus(); return; }
+  g.steps.push({ id:uid(), text:v.slice(0,100), done:null }); save(); render();
+  const n = document.querySelector('.step-in[data-id="' + id + '"]'); if(n) n.focus();
+}
+function ruleAdd(){
+  const i = $('#rule-in'), v = (i && i.value || '').trim(); if(!v){ if(i) i.focus(); return; }
+  state.rules.push(v.slice(0,100)); save(); render(); const n = $('#rule-in'); if(n) n.focus();
+}
+let gdraft = null;
+function goalEdit(id){
+  const g = id ? state.goals.find(x => x.id === id) : null;
+  gdraft = g ? { id:g.id, title:g.title, why:g.why || '', tpl:null, pick:new Set() } : { id:null, title:'', why:'', tpl:null, pick:new Set() };
+  drawGoal();
+}
+function drawGoal(){
+  const d = gdraft, T = d.tpl !== null ? GOAL_TEMPLATES[d.tpl] : null;
+  const have = new Set(state.habits.map(h => h.name));
+  openSheet('<h3>' + (d.id ? 'Ziel bearbeiten' : 'Neues Ziel') + '</h3>'
+    + (d.id ? '' : '<div class="field"><label>Vorlagen</label><div class="chips" id="g-tpl">' + GOAL_TEMPLATES.map((t, i) => '<button data-i="' + i + '" class="' + (d.tpl === i ? 'on' : '') + '">' + esc(t.title) + '</button>').join('') + '</div></div>')
+    + '<div class="field"><label for="g-title">Ziel</label><input id="g-title" type="text" maxlength="80" placeholder="z. B. Eine Freundin finden" value="' + esc(d.title) + '"></div>'
+    + '<div class="field"><label for="g-why">Warum ist dir das wichtig?</label><textarea id="g-why" maxlength="200">' + esc(d.why) + '</textarea></div>'
+    + (T ? '<div class="field"><label>Schritte (kommen mit)</label><p class="note" style="margin:0">' + T.steps.map(esc).join(' · ') + '</p></div>' : '')
+    + (T && T.habits.some(h => !have.has(h[0])) ? '<div class="field"><label>Passende Gewohnheiten dazu</label><div class="chips" id="g-hab">' + T.habits.filter(h => !have.has(h[0])).map(h => '<button data-n="' + esc(h[0]) + '" class="' + (d.pick.has(h[0]) ? 'on' : '') + '">' + esc(h[0]) + '</button>').join('') + '</div></div>' : '')
+    + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="goal-save">Speichern</button></div>'
+    + (d.id ? '<div class="small-btns"><button class="btn danger" data-act="goal-del">Ziel löschen</button></div>' : ''));
+  $('#g-title').oninput = e => d.title = e.target.value;
+  $('#g-why').oninput = e => d.why = e.target.value;
+  if($('#g-tpl')) $('#g-tpl').onclick = e => { const b = e.target.closest('button'); if(!b) return; const i = +b.dataset.i;
+    if(d.tpl === i){ d.tpl = null; d.pick = new Set(); } else { const t = GOAL_TEMPLATES[i]; d.tpl = i; d.title = t.title; d.why = t.why; d.pick = new Set(t.habits.map(h => h[0])); } drawGoal(); };
+  if($('#g-hab')) $('#g-hab').onclick = e => { const b = e.target.closest('button'); if(!b) return; const n = b.dataset.n; d.pick.has(n) ? d.pick.delete(n) : d.pick.add(n); b.classList.toggle('on'); };
+}
+function goalSave(){
+  const d = gdraft, title = (d.title || '').trim();
+  if(!title){ toast('Bitte ein Ziel eingeben.'); $('#g-title').focus(); return; }
+  if(d.id){ const g = state.goals.find(x => x.id === d.id); g.title = title.slice(0,80); g.why = (d.why || '').trim().slice(0,200); }
+  else {
+    const T = d.tpl !== null ? GOAL_TEMPLATES[d.tpl] : null;
+    state.goals.push({ id:uid(), title:title.slice(0,80), why:(d.why || '').trim().slice(0,200), steps:T ? T.steps.map(t => ({ id:uid(), text:t, done:null })) : [], created:dkey(today()), done:null });
+    let added = 0;
+    if(T) for(const [n, extra] of T.habits) if(d.pick.has(n) && !state.habits.some(h => h.name === n)){ addHabit(n, extra); added++; }
+    if(added) setTimeout(() => toast(added + (added === 1 ? ' Gewohnheit' : ' Gewohnheiten') + ' hinzugefügt.'), 50);
+  }
+  save(); closeSheet(); render();
+}
+
+/* ---------- Updates ---------- */
+let updateVer = null, lastUpdateCheck = 0;
+function verNewer(a, b){ const x = a.split('.').map(Number), y = b.split('.').map(Number); for(let i=0;i<3;i++){ if((x[i]||0) !== (y[i]||0)) return (x[i]||0) > (y[i]||0); } return false; }
+async function checkUpdate(manual){
+  lastUpdateCheck = Date.now();
+  try{
+    const r = await fetch('./index.html?check=' + Date.now(), { cache:'no-store' });
+    if(!r.ok) throw 0;
+    const m = (await r.text()).match(/const VERSION = '([\d.]+)'/);
+    if(m && verNewer(m[1], VERSION)){ updateVer = m[1]; $('#update-txt').textContent = 'Neue Version ' + m[1] + ' ist da.'; $('#update').hidden = false; if(manual) closeSheet(); }
+    else if(manual) toast('Du hast die neueste Version.');
+  }catch(e){ if(manual) toast('Keine Verbindung. Später nochmal.'); }
+}
+function doUpdate(){ save(); location.replace(location.pathname + '?v=' + Date.now()); }
+function whatsNew(){
+  let seen = null; try{ seen = localStorage.getItem('winterarc_seen_ver'); localStorage.setItem('winterarc_seen_ver', VERSION); }catch(e){}
+  if(!seen || seen === VERSION || !state.arc) return;
+  openSheet('<h3>Neu in ' + VERSION + '</h3><ul class="news">'
+    + '<li><b>Ziele:</b> eigenes Ziel mit Warum und Schritten – mit Vorlagen wie „Eine Freundin finden“.</li>'
+    + '<li><b>Aufgaben:</b> alles, was du erledigen musst, unter „Heute“. Offenes bleibt stehen, bis es erledigt ist.</li>'
+    + '<li><b>Meine Regeln:</b> deine Winter-Arc-Regeln, oder die 10 Regeln übernehmen.</li>'
+    + '<li><b>Updates:</b> neue Versionen kommen jetzt direkt in der App – ein Tipp auf „Aktualisieren“.</li>'
+    + '<li>Neue Bilder, neues Symbol, mehr Gewohnheiten zur Auswahl.</li></ul>'
+    + '<div class="row-btns" style="margin-top:16px"><button class="btn" data-act="cancel">Los</button></div>');
 }
 
 /* ---------- Bedienung ---------- */
@@ -746,11 +962,27 @@ document.addEventListener('click', e => {
   else if(act === 'export') exportData();
   else if(act === 'import') importData();
   else if(act === 'arc-go') arcGo();
+  else if(act === 'todo-add') todoAdd();
+  else if(act === 'todo-toggle'){ const t = state.todos.find(x => x.id === b.dataset.id); if(t){ t.done = t.done ? null : dkey(today()); save(); render(); } }
+  else if(act === 'todo-del'){ state.todos = state.todos.filter(x => x.id !== b.dataset.id); save(); render(); }
+  else if(act === 'goal-new') goalEdit(null);
+  else if(act === 'goal-edit') goalEdit(b.dataset.id);
+  else if(act === 'goal-save') goalSave();
+  else if(act === 'goal-del') openSheet('<h3>Ziel löschen?</h3><p>„' + esc(gdraft.title) + '“ und alle Schritte werden gelöscht.</p><div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn danger" data-act="goal-delok">Löschen</button></div>');
+  else if(act === 'goal-delok'){ state.goals = state.goals.filter(x => x.id !== gdraft.id); save(); closeSheet(); render(); }
+  else if(act === 'goal-won'){ const g = state.goals.find(x => x.id === b.dataset.id); if(g){ g.done = dkey(today()); save(); render(); toast('Ziel erreicht. Nächstes.'); } }
+  else if(act === 'step-toggle'){ const g = state.goals.find(x => x.id === b.dataset.id), st = g && g.steps.find(x => x.id === b.dataset.s); if(st && !g.done){ st.done = st.done ? null : dkey(today()); save(); render(); if(st.done && g.steps.every(x => x.done)) toast('Alle Schritte erledigt.'); } }
+  else if(act === 'step-add') stepAdd(b.dataset.id);
+  else if(act === 'rule-add') ruleAdd();
+  else if(act === 'rule-del'){ state.rules.splice(+b.dataset.i, 1); save(); render(); }
+  else if(act === 'rules-default'){ state.rules = DEFAULT_RULES.slice(); save(); render(); }
+  else if(act === 'check-update') checkUpdate(true);
+  else if(act === 'do-update') doUpdate();
   else if(act === 'new-arc') newArc();
   else if(act === 'new-arc-ok'){ setupWhy = state.arc ? state.arc.why : ''; setupStart = dkey(today()); setupDays = state.arc ? state.arc.days : 90; isNyeSel = false; state.arc = null; save(); closeSheet(); window.scrollTo(0,0); render(); }
 });
 document.querySelectorAll('nav.bar button').forEach(b => b.addEventListener('click', () => { tab = b.dataset.tab; window.scrollTo(0,0); render(); }));
-$('#add-top').onclick = () => editHabit(null);
+$('#add-top').onclick = () => tab === 'goals' ? goalEdit(null) : editHabit(null);
 $('#settings-btn').onclick = openSettings;
 
 // Schnee
@@ -766,12 +998,19 @@ $('#settings-btn').onclick = openSettings;
 // Nach Mitternacht oder beim Zurückkehren zur App den Tag aktualisieren
 let lastDay = dkey(today());
 function dayCheck(){ const k = dkey(today()); if(k !== lastDay){ if(dkey(viewDay) === lastDay) viewDay = today(); lastDay = k; render(); } }
-document.addEventListener('visibilitychange', () => { if(!document.hidden && $('#modal').hidden){ state = load(); dayCheck(); render(); } });
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden) return;
+  if(Date.now() - lastUpdateCheck > 5*60*1000) checkUpdate(false);
+  if($('#modal').hidden && !(document.activeElement && document.activeElement.tagName === 'INPUT')){ state = load(); dayCheck(); render(); }
+});
 setInterval(dayCheck, 60000);
 window.addEventListener('storage', e => { if(e.key === KEY){ state = load(); render(); } });
 
 $('#ver').textContent = 'Version ' + VERSION;
+if(location.search) history.replaceState(null, '', location.pathname);
 render();
+whatsNew();
+setTimeout(() => checkUpdate(false), 1500);
 </script>
 </body>
 </html>

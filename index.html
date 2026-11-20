@@ -400,6 +400,11 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
   background:var(--red); color:#fff; font-size:14px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; box-shadow:0 0 26px var(--red-glow); }
 .sos-big span{ font-family:var(--serif); font-size:24px; font-weight:600; letter-spacing:.04em; text-transform:none; }
 .sos-big:active{ transform:scale(.98); }
+.cat-h{ display:flex; justify-content:space-between; align-items:baseline; margin-top:20px; }
+.cat-h span{ letter-spacing:.1em; }
+.habit.is-done{ opacity:.55; }
+.habit.is-done .name{ text-decoration:line-through; text-decoration-color:rgba(255,255,255,.4); }
+#f-cat button{ font-size:12.5px; padding:8px 10px; }
 </style>
 </head>
 <body>
@@ -436,7 +441,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.6.1';
+const VERSION = '3.7.0';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
@@ -657,7 +662,20 @@ function streakText(h){
   if(h.mode === 'times') return s === 1 ? '1 Woche' : s + ' Wochen';
   return s === 1 ? '1 Tag' : s + ' Tage';
 }
-const activeHabits = () => state.habits.filter(h => !h.archived);
+// Themen in der Reihenfolge des Tages
+const CATS = [['morgen','Morgens'],['koerper','Körper'],['kopf','Kopf'],['mut','Mut & Kontakte'],['kontrolle','Selbstkontrolle'],['abend','Abends'],['sonst','Sonstiges']];
+const CAT_GUESS = [
+  ['morgen', /aufstehen|bett machen|kalt dusch|gepflegt|morgen|wecker/i],
+  ['abend', /22 uhr|abend|schlafen|handy nach|bildschirm/i],
+  ['kontrolle', /selbstkontrolle|clean|kein |keine |nicht rauchen|verzicht|ohne /i],
+  ['mut', /ansprechen|rausgehen|kontakt|anrufen|freund|date|sozial|leute|zocken/i],
+  ['kopf', /lesen|meditier|tagebuch|journal|lernen|aufgaben|seiten|sprache|planen/i],
+  ['koerper', /training|sport|schritte|wasser|liegest|laufen|joggen|gym|essen|protein|dehnen|kniebeug|zucker/i]
+];
+const guessCat = n => { for(const [c, re] of CAT_GUESS) if(re.test(n || '')) return c; return 'sonst'; };
+const catOf = h => (h.cat && CATS.some(c => c[0] === h.cat)) ? h.cat : guessCat(h.name);
+const catIdx = h => CATS.findIndex(c => c[0] === catOf(h));
+const activeHabits = () => state.habits.map((h, i) => [h, i]).filter(([h]) => !h.archived).sort((a, b) => catIdx(a[0]) - catIdx(b[0]) || a[1] - b[1]).map(x => x[0]);
 function addHabit(name, extra){
   state.habits.push(Object.assign({ id:uid(), name, color:COLORS[state.habits.length % COLORS.length], mode:'daily', days:[1,2,3,4,5], times:3, created:dkey(today()) }, extra || {}));
 }
@@ -817,8 +835,11 @@ function renderToday(){
   const msg = !total ? 'Heute ist nichts fällig.' : done === total ? 'Perfekter Tag.' : done === 0 ? 'Keine Ausreden.' : 'Nicht aufhören.';
   html += '<div class="summary"><svg class="ring" viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="26"/><circle class="fg" cx="32" cy="32" r="26" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C*(1-pct)) + '"/><text x="32" y="32">' + done + '/' + total + '</text></svg>'
     + '<p><b>' + msg + '</b>' + (total ? Math.round(pct*100) + ' % erledigt' : '') + '</p></div>';
-  const ordered = due.filter(h => !isDone(h, k)).concat(due.filter(h => isDone(h, k)));
-  html += '<div class="list">' + ordered.map(h => habitRow(h, k)).join('') + '</div>';
+  for(const [c, label] of CATS){
+    const g = due.filter(h => catOf(h) === c); if(!g.length) continue;
+    const dn = g.filter(h => isDone(h, k)).length;
+    html += '<h2 class="cat-h">' + label + '<span>' + dn + '/' + g.length + '</span></h2><div class="list">' + g.map(h => habitRow(h, k)).join('') + '</div>';
+  }
   if(free.length) html += '<h2>' + (isToday ? 'Heute frei' : 'An diesem Tag frei') + '</h2><div class="list">' + free.map(h => habitRow(h, k, true)).join('') + '</div>';
   html += '<div class="add-row"><button class="btn ghost wide" data-act="add">+ Gewohnheit</button></div>';
   html += tail();
@@ -831,7 +852,7 @@ function habitRow(h, k, off){
   if(h.mode === 'times') meta += '<span>diese Woche ' + weekCount(h, fromKey(k)) + '/' + h.times + '</span>';
   const st = streakText(h);
   if(st) meta += '<span class="streak">🔥 ' + st + '</span>';
-  return '<div class="habit' + (off ? ' off' : '') + '" style="--c:' + h.color + '">'
+  return '<div class="habit' + (off ? ' off' : '') + (done && !off ? ' is-done' : '') + '" style="--c:' + h.color + '">'
     + '<div class="info" data-act="edit" data-id="' + h.id + '"><div class="name">' + esc(h.name) + '</div><div class="meta">' + meta + '</div></div>'
     + '<button class="check' + (done ? ' done' : '') + '" data-act="toggle" data-id="' + h.id + '" data-k="' + k + '" aria-label="' + esc(h.name) + ' abhaken" aria-pressed="' + done + '">' + CHECK_SVG + '</button></div>';
 }
@@ -928,7 +949,7 @@ function editHabit(id){
   setTimeout(() => { const i = $('#f-name'); if(i && !h) i.focus(); }, 60);
 }
 function drawEdit(){
-  const d = draft, act = activeHabits(), idx = d.id ? act.findIndex(x => x.id === d.id) : -1;
+  const me = d0 => state.habits.find(x => x.id === d0.id), d = draft, act = d.id ? activeHabits().filter(x => catOf(x) === catOf(me(d))) : [], idx = d.id ? act.findIndex(x => x.id === d.id) : -1;
   const used = new Set(state.habits.map(h => h.name));
   const sugg = d.id ? '' : '<div class="field"><label>Ideen</label><div class="chips" id="f-sugg">' + SUGGEST.filter(s => !used.has(s)).map(s => '<button data-s="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</div></div>';
   openSheet('<h3>' + (d.id ? 'Gewohnheit bearbeiten' : 'Neue Gewohnheit') + '</h3>'
@@ -938,6 +959,7 @@ function drawEdit(){
       + [['daily','Täglich'],['days','Bestimmte Tage'],['times','x-mal pro Woche']].map(([m,l]) => '<button data-m="' + m + '" class="' + (d.mode === m ? 'on' : '') + '">' + l + '</button>').join('') + '</div></div>'
     + (d.mode === 'days' ? '<div class="field"><label>An welchen Tagen?</label><div class="seg days" id="f-days">' + [1,2,3,4,5,6,0].map(i => '<button data-d="' + i + '" class="' + (d.days.includes(i) ? 'on' : '') + '">' + WD_SHORT[i] + '</button>').join('') + '</div></div>' : '')
     + (d.mode === 'times' ? '<div class="field"><label>Wie oft pro Woche?</label><div class="seg" id="f-times">' + [1,2,3,4,5,6].map(n => '<button data-n="' + n + '" class="' + (d.times === n ? 'on' : '') + '">' + n + '×</button>').join('') + '</div></div>' : '')
+    + '<div class="field"><label>Thema</label><div class="seg" id="f-cat">' + CATS.map(([c, l]) => '<button data-c="' + c + '" class="' + ((d.cat || guessCat(d.name)) === c ? 'on' : '') + '">' + l + '</button>').join('') + '</div></div>'
     + '<div class="field"><label>Farbe</label><div class="colors" id="f-color">' + COLORS.map(c => '<button data-c="' + c + '" style="--c:' + c + '" class="' + (d.color === c ? 'on' : '') + '" aria-label="Farbe"></button>').join('') + '</div></div>'
     + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="save">Speichern</button></div>'
     + (d.id ? '<div class="small-btns"><button class="btn ghost" data-act="up"' + (idx <= 0 ? ' disabled style="opacity:.4"' : '') + '>↑ Hoch</button><button class="btn ghost" data-act="down"' + (idx >= act.length-1 ? ' disabled style="opacity:.4"' : '') + '>↓ Runter</button><button class="btn danger" data-act="del">Löschen</button></div>' : ''));
@@ -949,6 +971,8 @@ function drawEdit(){
   if($('#f-days')) $('#f-days').onclick = e => { const b = e.target.closest('button'); if(!b) return; const n = +b.dataset.d;
     draft.days = draft.days.includes(n) ? draft.days.filter(x => x !== n) : [...draft.days, n]; b.classList.toggle('on'); };
   if($('#f-times')) $('#f-times').onclick = e => { const b = e.target.closest('button'); if(!b) return; draft.times = +b.dataset.n; drawEdit(); };
+  $('#f-cat').onclick = e => { const b = e.target.closest('button'); if(!b) return; draft.cat = b.dataset.c; document.querySelectorAll('#f-cat button').forEach(x => x.classList.toggle('on', x === b)); };
+  name.addEventListener('change', () => { if(!draft.cat){ const g = guessCat(name.value); document.querySelectorAll('#f-cat button').forEach(x => x.classList.toggle('on', x.dataset.c === g)); } });
   $('#f-color').onclick = e => { const b = e.target.closest('button'); if(!b) return; draft.color = b.dataset.c; drawEdit(); };
 }
 function saveDraft(){
@@ -956,12 +980,12 @@ function saveDraft(){
   if(!name){ toast('Bitte einen Namen eingeben.'); $('#f-name').focus(); return; }
   if(d.mode === 'days' && !d.days.length){ toast('Bitte mindestens einen Tag wählen.'); return; }
   if(d.mode === 'days' && d.days.length === 7) d.mode = 'daily';
-  const fields = { name, color:d.color, mode:d.mode, days:d.days.slice().sort(), times:d.times };
+  const fields = { name, color:d.color, mode:d.mode, days:d.days.slice().sort(), times:d.times, cat:d.cat || guessCat(name) };
   if(d.id) Object.assign(state.habits.find(x => x.id === d.id), fields); else addHabit(name, fields);
   save(); closeSheet(); render();
 }
 function moveHabit(dir){
-  const act = activeHabits(), i = act.findIndex(x => x.id === draft.id), j = i + dir;
+  const me = state.habits.find(x => x.id === draft.id), act = activeHabits().filter(x => catOf(x) === catOf(me)), i = act.findIndex(x => x.id === draft.id), j = i + dir;
   if(j < 0 || j >= act.length) return;
   const a = state.habits.indexOf(act[i]), b = state.habits.indexOf(act[j]);
   [state.habits[a], state.habits[b]] = [state.habits[b], state.habits[a]];
@@ -1594,6 +1618,7 @@ function whatsNew(){
   let seen = null; try{ seen = localStorage.getItem('winterarc_seen_ver'); localStorage.setItem('winterarc_seen_ver', VERSION); }catch(e){}
   if(!seen || seen === VERSION || !state.arc) return;
   openSheet('<h3>Neu in ' + VERSION + '</h3><ul class="news">'
+    + '<li><b>Nach Themen sortiert:</b> Morgens, Körper, Kopf, Mut & Kontakte, Selbstkontrolle, Abends. Erledigtes bleibt an seinem Platz. Das Thema änderst du, wenn du eine Gewohnheit antippst.</li>'
     + '<li><b>Heute neu sortiert:</b> Gewohnheiten ganz oben, Erledigtes rutscht nach unten.</li>'
     + '<li><b>Dein Wolf wächst:</b> Welpe → Einzelgänger → Jäger → Alpha → Legende. Antippen zeigt, was noch fehlt.</li>'
     + '<li><b>Mut-Challenge:</b> jeden Tag eine kleine Aufgabe, die dich mutiger macht – Stufe für Stufe.</li>'

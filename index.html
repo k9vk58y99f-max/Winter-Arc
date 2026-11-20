@@ -290,6 +290,24 @@ nav.bar button.on{ color:#fff; }
 .rule-i::before{ content:counter(r, upper-roman); font-family:var(--serif); font-size:20px; color:var(--dim); min-width:30px; }
 .rule-i .t{ flex:1; font-family:var(--serif); font-size:20px; line-height:1.2; }
 .mini-btn{ font-size:10.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); padding:6px 0; }
+
+/* Speicher-Hinweise */
+.warn{ border:1px solid rgba(242,200,121,.55); background:rgba(242,200,121,.08); border-radius:var(--r); padding:12px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.4; }
+.warn b{ display:block; font-size:10.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--lamp); margin-bottom:4px; }
+.warn button{ margin-top:8px; font-size:10.5px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:#fff; text-decoration:underline; }
+.savedot{ color:rgba(236,235,231,.5); }
+.snap{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 0; border-top:1px solid var(--line); font-size:14px; }
+
+/* Clean-Zähler */
+.counter{ position:relative; margin-top:14px; background:linear-gradient(180deg, rgba(30,32,37,.8), rgba(12,12,14,.9)); border:1px solid var(--line); border-radius:var(--r); padding:16px 16px 14px; }
+.counter .k{ font-size:10.5px; font-weight:800; letter-spacing:.28em; text-transform:uppercase; color:var(--dim); }
+.counter .n{ font-family:var(--serif); font-size:56px; line-height:1; font-weight:500; margin:6px 0 2px; }
+.counter .n small{ font-size:22px; color:var(--dim); }
+.counter .sub{ color:var(--dim); font-size:12px; font-weight:700; letter-spacing:.08em; }
+.counter .bar{ margin:12px 0 4px; }
+.counter .row-btns{ margin-top:12px; }
+.counter .row-btns .btn{ padding:12px 8px; font-size:11px; letter-spacing:.16em; }
+.sos li{ margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -307,7 +325,7 @@ nav.bar button.on{ color:#fff; }
     </button>
   </header>
   <main id="view"></main>
-  <div class="footer">Deine Daten bleiben nur auf diesem Gerät. · <span id="ver"></span></div>
+  <div class="footer"><span class="savedot" id="savedot"></span> · <span id="ver"></span></div>
 </div>
 
 <nav class="bar">
@@ -326,12 +344,12 @@ nav.bar button.on{ color:#fff; }
 
 <script>
 'use strict';
-const VERSION = '3.0.0';
+const VERSION = '3.1.0';
 const KEY = 'winterarc_v1';
 const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-const SUGGEST = ['Vor 7 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt aus dem Haus','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Kein Alkohol','Kein Porno','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
+const SUGGEST = ['Vor 7 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt aus dem Haus','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Kein Alkohol','Kein Porno','Clean geblieben','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
 const QUOTES = [
   'Disziplin schlägt Motivation. Jeden Tag.',
   'Während sie schlafen, arbeitest du.',
@@ -352,18 +370,66 @@ const QUOTES = [
 /* ---------- Daten ---------- */
 // state = { arc:{start:'YYYY-MM-DD', days:n, why:''}|null, habits:[{id,name,color,mode,days,times,created,archived}], marks:{'YYYY-MM-DD':[ids]}, weekStart:1, snow:true }
 let state = load();
-function load(){
-  try{
-    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if(s && Array.isArray(s.habits)) return { arc:s.arc || null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false,
-      todos:Array.isArray(s.todos) ? s.todos : [], goals:Array.isArray(s.goals) ? s.goals : [], rules:Array.isArray(s.rules) ? s.rules : [] };
-  }catch(e){}
-  return { arc:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[] };
+function normalize(s){
+  if(!s || !Array.isArray(s.habits)) return null;
+  return { arc:s.arc || null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false,
+    todos:Array.isArray(s.todos) ? s.todos : [], goals:Array.isArray(s.goals) ? s.goals : [], rules:Array.isArray(s.rules) ? s.rules : [],
+    counters:Array.isArray(s.counters) ? s.counters : [], lastBackup:s.lastBackup || null, rev:+s.rev || 0, savedAt:s.savedAt || null };
 }
+function EMPTY(){ return { arc:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[], counters:[], lastBackup:null, rev:0, savedAt:null }; }
+function loadLS(){ try{ return normalize(JSON.parse(localStorage.getItem(KEY) || 'null')); }catch(e){ return null; } }
+function load(){ return loadLS() || EMPTY(); }
+const hasData = s => !!(s && (s.arc || s.habits.length || s.goals.length || s.todos.length || s.counters.length || s.rules.length));
+
+// Zweiter Speicher: IndexedDB (bleibt oft erhalten, wenn localStorage geleert wird) + eine Kopie pro Tag
+const dbP = new Promise(res => {
+  try{ const r = indexedDB.open('winterarc', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); r.onblocked = () => res(null); setTimeout(() => res(null), 4000); }
+  catch(e){ res(null); }
+});
+async function idb(mode, fn){
+  const db = await dbP; if(!db) return null;
+  return new Promise(res => { try{ const tx = db.transaction('kv', mode), st = tx.objectStore('kv'), r = fn(st);
+    tx.oncomplete = () => res(r && 'result' in r ? r.result : true); tx.onerror = () => res(null); }catch(e){ res(null); } });
+}
+const idbGet = k => idb('readonly', st => st.get(k));
+const idbPut = (k, v) => idb('readwrite', st => st.put(v, k));
+const idbKeys = () => idb('readonly', st => st.getAllKeys());
+const idbDel = k => idb('readwrite', st => st.delete(k));
+
 function save(){
-  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
-  catch(e){ toast('Speichern nicht möglich – Speicher voll?'); }
+  state.rev = (state.rev || 0) + 1; state.savedAt = new Date().toISOString();
+  const json = JSON.stringify(state);
+  let ok = true;
+  try{ localStorage.setItem(KEY, json); }catch(e){ ok = false; }
+  idbPut('state', json).then(r => { if(!r && !ok) toast('Speichern fehlgeschlagen!'); });
+  if(hasData(state)) idbPut('snap-' + dkey(today()), json).then(pruneSnaps);
+  showSaved();
 }
+async function pruneSnaps(){
+  const keys = ((await idbKeys()) || []).filter(k => String(k).startsWith('snap-')).sort();
+  for(const k of keys.slice(0, Math.max(0, keys.length - 14))) await idbDel(k);
+}
+function showSaved(){
+  const el = $('#savedot'); if(!el) return;
+  if(!state.savedAt){ el.textContent = 'Noch nichts gespeichert'; return; }
+  const d = new Date(state.savedAt);
+  el.textContent = '✓ Gespeichert ' + (dkey(d) === dkey(today()) ? 'um ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) : 'am ' + d.getDate() + '.' + (d.getMonth()+1) + '.');
+}
+// Beim Start: den neuesten Stand aus beiden Speichern nehmen
+async function bootStorage(){
+  let fromDb = null;
+  try{ fromDb = normalize(JSON.parse((await idbGet('state')) || 'null')); }catch(e){}
+  if(fromDb && hasData(fromDb) && (!hasData(state) || fromDb.rev > state.rev)){
+    const restored = !hasData(state);
+    state = fromDb; try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+    render(); if(restored) toast('Deine Daten wurden wiederhergestellt.');
+  } else if(hasData(state) && (!fromDb || state.rev >= fromDb.rev)) idbPut('state', JSON.stringify(state));
+  try{ if(navigator.storage && navigator.storage.persist) storagePersisted = await navigator.storage.persist(); }catch(e){}
+  showSaved();
+}
+let storagePersisted = null;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 
 /* ---------- Datum ---------- */
@@ -568,7 +634,7 @@ function renderToday(){
   const hs = activeHabits();
   const t = today(), k = dkey(viewDay), isToday = k === dkey(t);
   const label = isToday ? 'Heute' : (k === dkey(addDays(t,-1)) ? 'Gestern' : longDate(viewDay));
-  let html = arcCardHtml() + (isToday ? quoteHtml() : '');
+  let html = (isToday ? storageWarnHtml() : '') + arcCardHtml() + (isToday ? countersHtml() + quoteHtml() : '');
   html += '<div class="daynav"><button class="icon-btn" data-act="prev" aria-label="Vorheriger Tag">' + ARROW_L + '</button>'
     + '<div class="lbl"><b>' + label + '</b><span>' + (isToday ? longDate(viewDay) : 'Nachtragen') + '</span></div>'
     + '<button class="icon-btn" data-act="next" aria-label="Nächster Tag"' + (isToday ? ' disabled' : '') + '>' + ARROW_R + '</button></div>';
@@ -741,8 +807,12 @@ function openSettings(){
       + '<p class="note" style="margin:8px 0 0">Start: ' + longDate(fromKey(a.start)) + ' ' + fromKey(a.start).getFullYear() + ' · Ende: ' + longDate(arcInfo().end) + ' ' + arcInfo().end.getFullYear() + '</p></div>' : '')
     + '<div class="field"><label>Woche beginnt am</label><div class="seg" id="s-ws"><button data-v="1" class="' + (state.weekStart === 1 ? 'on' : '') + '">Montag</button><button data-v="0" class="' + (state.weekStart === 0 ? 'on' : '') + '">Sonntag</button></div></div>'
     + '<div class="field"><label>Schneefall</label><div class="seg" id="s-snow"><button data-v="1" class="' + (state.snow ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.snow ? 'on' : '') + '">Aus</button></div></div>'
-    + '<div class="field"><label>Sicherung</label><p class="note" style="margin:0 0 8px">Die Daten liegen nur auf diesem Gerät. Lade ab und zu eine Sicherung herunter.</p>'
-    + '<div class="row-btns"><button class="btn ghost" data-act="export">Speichern</button><button class="btn ghost" data-act="import">Laden</button></div></div>'
+    + '<div class="field"><label>Speicher</label><p class="note" style="margin:0 0 8px">Alles wird sofort doppelt auf diesem Gerät gespeichert, dazu jeden Tag eine Kopie (14 Tage).<br>'
+      + (state.savedAt ? 'Zuletzt gespeichert: ' + new Date(state.savedAt).toLocaleString('de-DE', { dateStyle:'short', timeStyle:'short' }) + '<br>' : '')
+      + 'Letzte Sicherung als Datei: ' + (state.lastBackup ? new Date(state.lastBackup).toLocaleDateString('de-DE') : 'noch nie') + '</p>'
+    + '<div class="row-btns"><button class="btn ghost" data-act="export">Sicherung speichern</button><button class="btn ghost" data-act="import">Sicherung laden</button></div>'
+    + '<button class="btn ghost wide" style="margin-top:8px" data-act="snaps">Ältere Kopie wiederherstellen</button>'
+    + '<p class="note" style="margin:8px 0 0">Tipp: „Sicherung speichern“ → „In Dateien sichern“ → iCloud Drive. Dann ist sie auch sicher, wenn das Handy weg ist.</p></div>'
     + '<div class="field"><label>App-Version</label><p class="note" style="margin:0 0 8px">Du hast Version ' + VERSION + '. Neue Versionen meldet die App von selbst.</p><button class="btn ghost wide" data-act="check-update">Nach Update suchen</button></div>'
     + (a ? '<div class="field"><label>Neu anfangen</label><button class="btn danger wide" data-act="new-arc">Neu starten</button><p class="note" style="margin:6px 0 0">Gewohnheiten und Haken bleiben, nur Start und Dauer werden neu festgelegt.</p></div>' : '')
     + '<div class="row-btns" style="margin-top:18px"><button class="btn" data-act="cancel">Fertig</button></div>');
@@ -755,12 +825,18 @@ function newArc(){
   openSheet('<h3>Neu starten?</h3><p>Deine Gewohnheiten und alle Haken bleiben erhalten. Du legst nur Start, Dauer und dein Warum neu fest.</p>'
     + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="new-arc-ok">Neu starten</button></div>');
 }
-function exportData(){
+async function exportData(){
+  const name = 'Winter-Arc-Sicherung-' + dkey(today()) + '.json';
   const blob = new Blob([JSON.stringify({ app:'winter-arc', version:VERSION, exported:new Date().toISOString(), ...state }, null, 1)], { type:'application/json' });
+  const done = () => { state.lastBackup = new Date().toISOString(); save(); render(); toast('Sicherung gespeichert.'); };
+  try{
+    const file = new File([blob], name, { type:'application/json' });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){ await navigator.share({ files:[file], title:'Winter Arc Sicherung' }); done(); return; }
+  }catch(e){ if(e && e.name === 'AbortError') return; }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'Winter-Arc-Sicherung-' + dkey(today()) + '.json';
+  a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  toast('Sicherung gespeichert.');
+  done();
 }
 function importData(){
   const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json,.json';
@@ -769,6 +845,13 @@ function importData(){
     try{
       const s = JSON.parse(await f.text());
       if(!s || !Array.isArray(s.habits) || typeof s.marks !== 'object') throw 0;
+      mergeIn(s); save(); closeSheet(); render(); toast('Sicherung geladen.');
+    }catch(e){ toast('Diese Datei ist keine gültige Sicherung.'); }
+  };
+  inp.click();
+}
+function mergeIn(s){
+    {
       // Zusammenführen: nichts Vorhandenes geht verloren
       const okDate = v => /^\d{4}-\d\d-\d\d$/.test(v);
       if(!state.arc && s.arc && okDate(s.arc.start)) state.arc = { start:s.arc.start, days:Math.max(1, +s.arc.days || 90), why:String(s.arc.why || '').slice(0,160) };
@@ -782,12 +865,11 @@ function importData(){
         state.goals.push({ id:String(g.id), title:String(g.title).slice(0,80), why:String(g.why || '').slice(0,200), created:okDate(g.created) ? g.created : dkey(today()), done:okDate(g.done) ? g.done : null,
           steps:Array.isArray(g.steps) ? g.steps.filter(x => x && x.text).map(x => ({ id:String(x.id || uid()), text:String(x.text).slice(0,100), done:okDate(x.done) ? x.done : null })) : [] });
       if(Array.isArray(s.rules)) for(const r of s.rules) if(typeof r === 'string' && r && !state.rules.includes(r)) state.rules.push(r.slice(0,100));
+      if(Array.isArray(s.counters)) for(const c of s.counters) if(c && c.id && c.name && okDate(c.start) && !state.counters.some(x => x.id === c.id))
+        state.counters.push({ id:String(c.id), name:String(c.name).slice(0,60), start:c.start, best:+c.best || 0, relapses:Array.isArray(c.relapses) ? c.relapses.filter(okDate) : [] });
       for(const k in s.marks){ if(!okDate(k) || !Array.isArray(s.marks[k])) continue;
         state.marks[k] = [...new Set([...(state.marks[k] || []), ...s.marks[k].map(String)])]; }
-      save(); closeSheet(); render(); toast('Sicherung geladen.');
-    }catch(e){ toast('Diese Datei ist keine gültige Sicherung.'); }
-  };
-  inp.click();
+    }
 }
 
 /* ---------- Aufgaben ---------- */
@@ -824,6 +906,9 @@ const GOAL_TEMPLATES = [
   { title:'Mein Leben in Ordnung bringen', why:'Kein Chaos mehr. Ich habe alles im Griff.',
     steps:['Zimmer oder Wohnung komplett ausmisten','Alle offenen Briefe und Rechnungen erledigen','Wichtige Termine machen (Arzt, Amt …)','Feste Schlafenszeit festlegen','Alles Offene aufschreiben – und abarbeiten'],
     habits:[['Bett machen',null],['Aufgaben-Liste abarbeiten',null],['Kein Handy nach 22 Uhr',null]] },
+  { title:'Frei von Pornos', why:'Ich will meine Energie, meinen Fokus und mein Selbstvertrauen zurück – für das echte Leben und eine echte Frau.',
+    steps:['Pornoseiten sperren: Einstellungen → Bildschirmzeit → Inhalte & Datenschutz → Store-, Web-, Siri-Inhalte → Webinhalte → „Websites für Erwachsene begrenzen“','Bildschirmzeit-Code von einem Freund setzen lassen','Handy nachts nicht mehr im Schlafzimmer laden','Accounts entfolgen, die dich triggern','Aufschreiben: Wann, wo und warum kommt der Drang?','7 Tage clean','30 Tage clean','90 Tage clean'],
+    habits:[['Clean geblieben',null],['Kalt duschen',null],['Kein Handy nach 22 Uhr',null]], counter:'Kein Porno, kein Wichsen' },
   { title:'Mehr Geld auf dem Konto', why:'Ich will Rücklagen statt Sorgen.',
     steps:['Alle Ausgaben eines Monats aufschreiben','Unnötige Abos kündigen','Sparziel festlegen','Dauerauftrag aufs Sparkonto einrichten'],
     habits:[['Kein unnötiger Kauf',null]] }
@@ -837,6 +922,9 @@ function renderGoals(){
   html += '<div class="list">' + open.map(goalHtml).join('') + '</div>';
   if(state.goals.length) html += '<div class="add-row"><button class="btn ghost wide" data-act="goal-new">+ Neues Ziel</button></div>';
   if(won.length) html += '<h2>Erreicht</h2><div class="list">' + won.map(goalHtml).join('') + '</div>';
+  html += '<h2>Clean-Zähler</h2>';
+  if(state.counters.length) html += '<div class="rules">' + state.counters.map(c => '<div class="rule-i" style="counter-increment:none"><div class="t">' + esc(c.name) + ' <span class="note">· ' + cDays(c) + ' Tage</span></div><button class="x" data-act="relapse" data-id="' + c.id + '" aria-label="Zähler bearbeiten">✎</button></div>').join('') + '</div>';
+  html += '<div class="add-row" style="margin-top:8px"><button class="btn ghost wide" data-act="counter-new">+ Clean-Zähler starten</button></div>';
   html += '<h2>Meine Regeln</h2>';
   if(state.rules.length) html += '<div class="rules">' + state.rules.map((r, i) => '<div class="rule-i"><div class="t">' + esc(r) + '</div><button class="x" data-act="rule-del" data-i="' + i + '" aria-label="Regel löschen">×</button></div>').join('') + '</div>';
   else html += '<div class="empty" style="padding:20px 16px">Ein Arc ohne Regeln ist nur ein Vorsatz.<div class="add-row"><button class="btn" data-act="rules-default">Die 10 Regeln übernehmen</button></div></div>';
@@ -898,9 +986,81 @@ function goalSave(){
     state.goals.push({ id:uid(), title:title.slice(0,80), why:(d.why || '').trim().slice(0,200), steps:T ? T.steps.map(t => ({ id:uid(), text:t, done:null })) : [], created:dkey(today()), done:null });
     let added = 0;
     if(T) for(const [n, extra] of T.habits) if(d.pick.has(n) && !state.habits.some(h => h.name === n)){ addHabit(n, extra); added++; }
+    if(T && T.counter && !state.counters.some(c => c.name === T.counter)) state.counters.push({ id:uid(), name:T.counter, start:dkey(today()), best:0, relapses:[] });
     if(added) setTimeout(() => toast(added + (added === 1 ? ' Gewohnheit' : ' Gewohnheiten') + ' hinzugefügt.'), 50);
   }
   save(); closeSheet(); render();
+}
+
+/* ---------- Clean-Zähler ---------- */
+const MILESTONES = [1,3,7,14,21,30,45,60,90,120,180,365];
+const COUNTER_PRESETS = ['Kein Porno, kein Wichsen','Kein Alkohol','Kein Zocken','Kein Social Media','Nicht rauchen'];
+const cDays = c => Math.max(0, daysBetween(fromKey(c.start), today()));
+function countersHtml(){
+  return state.counters.map(c => {
+    const n = cDays(c), best = Math.max(c.best || 0, n), next = MILESTONES.find(m => m > n) || n + 30, prev = [...MILESTONES].reverse().find(m => m <= n) || 0;
+    return '<div class="counter"><div class="k">Clean · ' + esc(c.name) + '</div>'
+      + '<div class="n">' + n + ' <small>' + (n === 1 ? 'Tag' : 'Tage') + '</small></div>'
+      + '<div class="sub">Rekord ' + best + ' ' + (best === 1 ? 'Tag' : 'Tage') + ' · nächstes Ziel: ' + next + (next === 1 ? ' Tag' : ' Tage') + '</div>'
+      + '<div class="bar"><b style="width:' + Math.round((n - prev) / (next - prev) * 100) + '%"></b></div>'
+      + '<div class="row-btns"><button class="btn" data-act="sos" data-id="' + c.id + '">Drang? Notfallplan</button><button class="btn ghost" data-act="relapse" data-id="' + c.id + '">Rückfall</button></div></div>';
+  }).join('');
+}
+function counterNew(){
+  openSheet('<h3>Clean-Zähler</h3><p class="note" style="margin:0 0 14px">Zählt jeden Tag, an dem du durchhältst. Bei einem Rückfall fängst du neu an – dein Rekord bleibt.</p>'
+    + '<div class="field"><label>Wovon willst du loskommen?</label><div class="chips" id="c-pre">' + COUNTER_PRESETS.filter(n => !state.counters.some(c => c.name === n)).map(n => '<button data-n="' + esc(n) + '">' + esc(n) + '</button>').join('') + '</div></div>'
+    + '<div class="field"><label for="c-name">Name</label><input id="c-name" type="text" maxlength="60" placeholder="z. B. Kein Porno, kein Wichsen"></div>'
+    + '<div class="field"><label for="c-start">Clean seit</label><input id="c-start" type="date" value="' + dkey(today()) + '" max="' + dkey(today()) + '"></div>'
+    + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="counter-save">Starten</button></div>');
+  $('#c-pre').onclick = e => { const b = e.target.closest('button'); if(!b) return; $('#c-name').value = b.dataset.n; document.querySelectorAll('#c-pre button').forEach(x => x.classList.toggle('on', x === b)); };
+}
+function counterSave(){
+  const name = ($('#c-name').value || '').trim(), st = $('#c-start').value;
+  if(!name){ toast('Bitte einen Namen eingeben.'); return; }
+  const start = /^\d{4}-\d\d-\d\d$/.test(st) && st <= dkey(today()) ? st : dkey(today());
+  state.counters.push({ id:uid(), name:name.slice(0,60), start, best:0, relapses:[] });
+  save(); closeSheet(); tab = 'today'; render(); toast('Zähler läuft. Tag für Tag.');
+}
+function sos(id){
+  const c = state.counters.find(x => x.id === id); if(!c) return;
+  const g = state.goals.find(x => x.title === 'Frei von Pornos' && !x.done);
+  openSheet('<h3>Nicht jetzt.</h3><p>Der Drang ist wie eine Welle: Nach 10 bis 15 Minuten ist er vorbei. Du musst nur diese Minuten gewinnen.</p>'
+    + '<ol class="sos"><li><b>Steh sofort auf</b> und geh in einen anderen Raum. Tür auf, Licht an.</li>'
+    + '<li><b>Handy weg</b> – in ein anderes Zimmer oder ausschalten.</li>'
+    + '<li><b>20 Liegestütze oder 50 Kniebeugen.</b> Jetzt.</li>'
+    + '<li><b>Kalt duschen</b> oder kaltes Wasser ins Gesicht.</li>'
+    + '<li><b>Raus.</b> 10 Minuten spazieren, egal wie kalt.</li>'
+    + '<li><b>Schreib jemandem</b> oder ruf einen Freund an.</li></ol>'
+    + (g && g.why ? '<p class="quote" style="margin:16px 0 0;font-size:20px">„' + esc(g.why) + '“</p>' : '')
+    + '<p class="note" style="text-align:center;margin:14px 0 0">' + cDays(c) + (cDays(c) === 1 ? ' Tag' : ' Tage') + ' clean. Wirf das nicht weg.</p>'
+    + '<div class="row-btns" style="margin-top:16px"><button class="btn" data-act="cancel">Ich bleib stark</button></div>');
+}
+function relapse(id){
+  const c = state.counters.find(x => x.id === id); if(!c) return;
+  openSheet('<h3>Rückfall?</h3><p>Passiert. Wichtig ist nur, was du jetzt machst. Dein Rekord von ' + Math.max(c.best || 0, cDays(c)) + ' Tagen bleibt stehen, der Zähler beginnt wieder bei 0.</p>'
+    + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn danger" data-act="relapse-ok" data-id="' + c.id + '">Neu anfangen</button></div>'
+    + '<div class="small-btns"><button class="btn ghost" data-act="counter-del" data-id="' + c.id + '">Zähler löschen</button></div>');
+}
+
+/* ---------- Speicher-Warnungen ---------- */
+function storageWarnHtml(){
+  let h = '';
+  if(isIOS() && !isStandalone()) h += '<div class="warn"><b>Achtung: Browser</b>Du nutzt Winter Arc gerade im Browser. Daten im Browser können verloren gehen und sind getrennt von der App auf dem Home-Bildschirm. Öffne Winter Arc nur über das Symbol auf dem Home-Bildschirm.</div>';
+  const last = state.lastBackup ? daysBetween(new Date(state.lastBackup), new Date()) : null;
+  if(hasData(state) && (last === null || last >= 7) && state.arc && daysBetween(fromKey(state.arc.start), today()) >= 2)
+    h += '<div class="warn"><b>Sicherung</b>' + (last === null ? 'Du hast noch keine Sicherung gemacht.' : 'Deine letzte Sicherung ist ' + last + ' Tage alt.') + ' Speicher sie in iCloud – dann ist nichts verloren, auch wenn das Handy weg ist.<br><button data-act="export">Jetzt sichern</button></div>';
+  return h;
+}
+async function openSnaps(){
+  const keys = ((await idbKeys()) || []).filter(k => String(k).startsWith('snap-')).sort().reverse();
+  openSheet('<h3>Ältere Kopie</h3><p class="note" style="margin:0 0 8px">Die App legt jeden Tag eine Kopie an. Beim Wiederherstellen wird die Kopie mit deinem jetzigen Stand zusammengeführt – es geht nichts verloren.</p>'
+    + (keys.length ? keys.map(k => { const d = fromKey(k.slice(5)); return '<div class="snap"><span>' + longDate(d) + ' ' + d.getFullYear() + '</span><button class="btn ghost" style="padding:8px 12px" data-act="snap-restore" data-k="' + k + '">Wiederherstellen</button></div>'; }).join('')
+      : '<p>Noch keine Kopien vorhanden.</p>')
+    + '<div class="row-btns" style="margin-top:14px"><button class="btn" data-act="cancel">Schließen</button></div>');
+}
+async function snapRestore(k){
+  try{ const s = normalize(JSON.parse(await idbGet(k))); if(!s) throw 0; mergeIn(s); save(); closeSheet(); render(); toast('Kopie wiederhergestellt.'); }
+  catch(e){ toast('Diese Kopie ließ sich nicht lesen.'); }
 }
 
 /* ---------- Updates ---------- */
@@ -921,6 +1081,8 @@ function whatsNew(){
   let seen = null; try{ seen = localStorage.getItem('winterarc_seen_ver'); localStorage.setItem('winterarc_seen_ver', VERSION); }catch(e){}
   if(!seen || seen === VERSION || !state.arc) return;
   openSheet('<h3>Neu in ' + VERSION + '</h3><ul class="news">'
+    + '<li><b>Sicher speichern:</b> alles wird jetzt doppelt gespeichert, dazu jeden Tag eine Kopie. Sicherung direkt in iCloud. „✓ Gespeichert“ steht unten auf jeder Seite.</li>'
+    + '<li><b>Clean-Zähler:</b> zählt deine Tage ohne Porno (oder Alkohol, Zocken …), mit Rekord und Notfallplan, wenn der Drang kommt. Neue Ziel-Vorlage „Frei von Pornos“.</li>'
     + '<li><b>Ziele:</b> eigenes Ziel mit Warum und Schritten – mit Vorlagen wie „Eine Freundin finden“.</li>'
     + '<li><b>Aufgaben:</b> alles, was du erledigen musst, unter „Heute“. Offenes bleibt stehen, bis es erledigt ist.</li>'
     + '<li><b>Meine Regeln:</b> deine Winter-Arc-Regeln, oder die 10 Regeln übernehmen.</li>'
@@ -977,6 +1139,14 @@ document.addEventListener('click', e => {
   else if(act === 'rule-del'){ state.rules.splice(+b.dataset.i, 1); save(); render(); }
   else if(act === 'rules-default'){ state.rules = DEFAULT_RULES.slice(); save(); render(); }
   else if(act === 'check-update') checkUpdate(true);
+  else if(act === 'snaps') openSnaps();
+  else if(act === 'snap-restore') snapRestore(b.dataset.k);
+  else if(act === 'counter-new') counterNew();
+  else if(act === 'counter-save') counterSave();
+  else if(act === 'sos') sos(b.dataset.id);
+  else if(act === 'relapse') relapse(b.dataset.id);
+  else if(act === 'relapse-ok'){ const c = state.counters.find(x => x.id === b.dataset.id); if(c){ c.best = Math.max(c.best || 0, cDays(c)); c.relapses.push(dkey(today())); c.start = dkey(today()); save(); closeSheet(); render(); toast('Tag 0. Steh auf. Weiter.'); } }
+  else if(act === 'counter-del'){ state.counters = state.counters.filter(x => x.id !== b.dataset.id); save(); closeSheet(); render(); }
   else if(act === 'do-update') doUpdate();
   else if(act === 'new-arc') newArc();
   else if(act === 'new-arc-ok'){ setupWhy = state.arc ? state.arc.why : ''; setupStart = dkey(today()); setupDays = state.arc ? state.arc.days : 90; isNyeSel = false; state.arc = null; save(); closeSheet(); window.scrollTo(0,0); render(); }
@@ -1001,15 +1171,19 @@ function dayCheck(){ const k = dkey(today()); if(k !== lastDay){ if(dkey(viewDay
 document.addEventListener('visibilitychange', () => {
   if(document.hidden) return;
   if(Date.now() - lastUpdateCheck > 5*60*1000) checkUpdate(false);
-  if($('#modal').hidden && !(document.activeElement && document.activeElement.tagName === 'INPUT')){ state = load(); dayCheck(); render(); }
+  const ls = loadLS();
+  if(ls && hasData(ls) && ls.rev > (state.rev || 0) && $('#modal').hidden){ state = ls; render(); }
+  else if(hasData(state) && !(ls && hasData(ls))){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} idbPut('state', JSON.stringify(state)); }
+  dayCheck();
 });
+window.addEventListener('pagehide', () => { if(hasData(state)){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} } });
 setInterval(dayCheck, 60000);
-window.addEventListener('storage', e => { if(e.key === KEY){ state = load(); render(); } });
+window.addEventListener('storage', e => { if(e.key === KEY){ const ls = loadLS(); if(ls && hasData(ls)){ state = ls; render(); } } });
 
 $('#ver').textContent = 'Version ' + VERSION;
 if(location.search) history.replaceState(null, '', location.pathname);
 render();
-whatsNew();
+bootStorage().then(whatsNew);
 setTimeout(() => checkUpdate(false), 1500);
 </script>
 </body>

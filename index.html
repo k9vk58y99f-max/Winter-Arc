@@ -3,36 +3,53 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Winterwandel</title>
-<meta name="description" content="Dein Winterwandel: Gewohnheiten abhaken, Tage zählen, dranbleiben.">
-<meta name="theme-color" content="#070b14">
+<title>Winter Arc</title>
+<meta name="description" content="Winter Arc: Keine Ausreden. Jeden Tag abhaken. Bis zum Ende.">
+<meta name="theme-color" content="#050506">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Winterwandel">
+<meta name="apple-mobile-web-app-title" content="Winter Arc">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="img/icon-32.png">
 <link rel="apple-touch-icon" href="img/icon-180.png">
 <style>
-/* Winterwandel – eine Datei, Daten nur auf dem Gerät (localStorage). */
+/* WINTER ARC – dunkel, kalt, ohne Ausreden. Eine Datei, Daten nur auf dem Gerät (localStorage). */
+@font-face { font-family:'Cormorant'; font-style:normal; font-weight:300 700; font-display:swap; src:url(fonts/Cormorant-latinext.woff2) format('woff2');
+  unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20AB, U+20AD-20C4; }
+@font-face { font-family:'Cormorant'; font-style:normal; font-weight:300 700; font-display:swap; src:url(fonts/Cormorant-latin.woff2) format('woff2');
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family:'Manrope'; font-style:normal; font-weight:200 800; font-display:swap; src:url(fonts/Manrope-latinext.woff2) format('woff2');
   unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20AB, U+20AD-20C4; }
 @font-face { font-family:'Manrope'; font-style:normal; font-weight:200 800; font-display:swap; src:url(fonts/Manrope-latin.woff2) format('woff2');
   unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 :root{
-  --bg:#070b14; --panel:#0f1726; --panel2:#17223a; --line:rgba(200,225,255,.12);
-  --text:#eaf2fc; --dim:rgba(220,234,250,.62); --ice:#8fd0ff; --ice2:#cfeaff; --ice-d:#3b7fb8;
-  --ok:#7fe0c4; --bad:#ff8a80; --shadow:0 8px 28px rgba(0,0,0,.45);
-  --nav-h:64px; --r:18px;
+  --bg:#050506; --panel:rgba(20,21,24,.72); --panel2:rgba(255,255,255,.05); --line:rgba(255,255,255,.12);
+  --text:#ecebe7; --dim:rgba(236,235,231,.55); --ice:#ffffff; --ice2:#d9dde3; --ice-d:#5b6470;
+  --lamp:#f2c879; --blood:#c2312b; --shadow:0 10px 40px rgba(0,0,0,.6);
+  --nav-h:64px; --r:4px; --serif:'Cormorant', 'Times New Roman', serif;
 }
 *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html,body{ margin:0; background:var(--bg); color:var(--text); }
+html,body{ margin:0; background:var(--bg); color:var(--text); font-variant-numeric:lining-nums; }
+.ring text{ font-variant-numeric:lining-nums; }
 body{
-  font-family:'Manrope', system-ui, sans-serif; font-size:16px; line-height:1.45; font-weight:500;
+  font-family:'Manrope', system-ui, sans-serif; font-size:15.5px; line-height:1.45; font-weight:500;
   min-height:100vh; padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
   overscroll-behavior:none;
-  background:radial-gradient(120% 60% at 50% -10%, #12284a 0%, rgba(7,11,20,0) 60%) var(--bg) no-repeat;
+  background:
+    radial-gradient(60% 35% at 78% 4%, rgba(242,200,121,.10) 0%, rgba(0,0,0,0) 70%),
+    radial-gradient(120% 70% at 50% 0%, #1b1d22 0%, rgba(5,5,6,0) 65%),
+    var(--bg);
+  background-attachment:fixed;
 }
+/* Filmkorn + Vignette über allem */
+body::before{ content:''; position:fixed; inset:-50%; z-index:30; pointer-events:none; opacity:.09;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1.2s steps(6) infinite; }
+body::after{ content:''; position:fixed; inset:0; z-index:29; pointer-events:none; background:radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.65) 100%); }
+@keyframes grain{ 0%{transform:translate(0,0)} 20%{transform:translate(-3%,2%)} 40%{transform:translate(2%,-3%)} 60%{transform:translate(-2%,-1%)} 80%{transform:translate(3%,3%)} 100%{transform:translate(0,0)} }
+@media (prefers-reduced-motion: reduce){ body::before{ animation:none; } }
+
 button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; padding:0; }
 input,select,textarea{ font:inherit; color:var(--text); }
 .wrap{ position:relative; z-index:1; max-width:640px; margin:0 auto; padding:calc(14px + env(safe-area-inset-top)) 16px 0; }
@@ -40,169 +57,176 @@ input,select,textarea{ font:inherit; color:var(--text); }
 /* Schnee */
 #snow{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
 #snow i{ position:absolute; top:-10px; width:var(--s); height:var(--s); border-radius:50%; background:#fff; opacity:var(--o);
-  animation:fall var(--t) linear var(--d) infinite; filter:blur(.4px); }
+  animation:fall var(--t) linear var(--d) infinite; filter:blur(.6px); }
 @keyframes fall{ to{ transform:translate(var(--x), 105vh); } }
 @media (prefers-reduced-motion: reduce){ #snow{ display:none; } }
 body.no-snow #snow{ display:none; }
 
-header.top{ display:flex; align-items:center; gap:6px; margin-bottom:14px; }
-header.top h1{ font-size:24px; font-weight:800; letter-spacing:-.01em; margin:0; flex:1; display:flex; align-items:center; gap:8px; }
-header.top h1 svg{ width:22px; height:22px; color:var(--ice); }
+.serif{ font-family:var(--serif); }
+header.top{ display:flex; align-items:center; gap:6px; margin-bottom:18px; }
+header.top h1{ font-family:var(--serif); font-size:26px; font-weight:500; letter-spacing:.22em; text-transform:uppercase; margin:0; flex:1; display:flex; align-items:center; gap:10px; }
+header.top h1 svg{ display:none; }
 .icon-btn{ width:40px; height:40px; border-radius:50%; display:grid; place-items:center; color:var(--ice2); }
 .icon-btn:active{ background:var(--panel2); }
-.icon-btn svg{ width:22px; height:22px; }
+.icon-btn svg{ width:21px; height:21px; }
 
-/* Karte */
-.arc{ background:linear-gradient(160deg, #13284a 0%, #0f1726 70%); border:1px solid var(--line); border-radius:22px; padding:18px; box-shadow:var(--shadow); }
-.arc .day{ font-size:13px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--ice); }
-.arc .big{ font-size:40px; font-weight:800; line-height:1.05; margin:4px 0 2px; letter-spacing:-.02em; }
-.arc .big small{ font-size:18px; font-weight:600; color:var(--dim); }
-.bar{ height:8px; background:rgba(255,255,255,.08); border-radius:99px; overflow:hidden; margin:12px 0 10px; }
-.bar b{ display:block; height:100%; background:linear-gradient(90deg, var(--ice-d), var(--ice), #fff); border-radius:99px; }
-.arc .row{ display:flex; gap:8px; }
-.arc .row div{ flex:1; background:rgba(255,255,255,.05); border-radius:12px; padding:8px 6px; text-align:center; }
-.arc .row b{ display:block; font-size:20px; font-weight:800; }
-.arc .row span{ font-size:11.5px; color:var(--dim); font-weight:600; }
-.arc .why{ margin-top:12px; font-size:14px; color:var(--ice2); font-style:italic; }
-.arc .why::before{ content:'Mein Warum: '; font-style:normal; font-weight:700; color:var(--dim); }
-.quote{ margin:14px 4px 0; color:var(--dim); font-size:14.5px; }
-.quote b{ color:var(--text); font-weight:700; }
+/* Arc-Karte */
+.arc{ position:relative; background:linear-gradient(180deg, rgba(30,32,37,.75), rgba(12,12,14,.85)); border:1px solid var(--line); border-radius:var(--r); padding:20px 18px; box-shadow:var(--shadow); overflow:hidden; }
+.arc::after{ content:''; position:absolute; left:18px; right:18px; top:0; height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent); }
+.arc .day{ font-size:11px; font-weight:700; letter-spacing:.32em; text-transform:uppercase; color:var(--dim); }
+.arc .big{ font-family:var(--serif); font-size:52px; font-weight:500; line-height:1; margin:8px 0 2px; letter-spacing:.04em; text-transform:uppercase; }
+.arc .big small{ font-size:22px; font-weight:400; color:var(--dim); letter-spacing:.08em; text-transform:none; }
+.bar{ height:2px; background:rgba(255,255,255,.12); overflow:hidden; margin:16px 0 14px; }
+.bar b{ display:block; height:100%; background:#fff; box-shadow:0 0 10px rgba(255,255,255,.8); }
+.arc .row{ display:flex; gap:0; border-top:1px solid var(--line); }
+.arc .row div{ flex:1; padding:12px 4px 0; text-align:center; }
+.arc .row div + div{ border-left:1px solid var(--line); }
+.arc .row b{ display:block; font-family:var(--serif); font-size:30px; font-weight:500; line-height:1.1; }
+.arc .row span{ font-size:10px; color:var(--dim); font-weight:700; letter-spacing:.18em; text-transform:uppercase; }
+.arc .why{ margin-top:16px; font-family:var(--serif); font-size:19px; color:var(--text); font-style:italic; text-align:center; }
+.arc .why::before{ content:'„'; } .arc .why::after{ content:'“'; }
+.quote{ margin:26px 6px 4px; color:var(--text); font-family:var(--serif); font-size:22px; line-height:1.25; text-align:center; font-weight:500; }
+.quote b{ display:block; font-family:'Manrope', sans-serif; font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:var(--dim); font-weight:700; margin-bottom:6px; }
 
-.daynav{ display:flex; align-items:center; justify-content:space-between; background:var(--panel); border-radius:var(--r); padding:6px; margin-top:16px; border:1px solid var(--line); }
+.daynav{ display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:4px 0; margin-top:22px; }
 .daynav .lbl{ text-align:center; }
-.daynav .lbl b{ display:block; font-weight:800; font-size:17px; }
-.daynav .lbl span{ color:var(--dim); font-size:13.5px; }
-.daynav button:disabled{ opacity:.25; cursor:default; }
+.daynav .lbl b{ display:block; font-family:var(--serif); font-weight:500; font-size:21px; letter-spacing:.12em; text-transform:uppercase; }
+.daynav .lbl span{ color:var(--dim); font-size:12px; letter-spacing:.06em; }
+.daynav button:disabled{ opacity:.2; cursor:default; }
 
-.summary{ display:flex; align-items:center; gap:14px; margin:16px 2px; }
-.ring{ width:64px; height:64px; flex:none; }
-.ring circle{ fill:none; stroke-width:7; }
-.ring .bg{ stroke:var(--line); }
-.ring .fg{ stroke:var(--ice); stroke-linecap:round; transition:stroke-dashoffset .4s; transform:rotate(-90deg); transform-origin:50% 50%; }
-.ring text{ fill:var(--text); font-size:17px; font-weight:800; text-anchor:middle; dominant-baseline:central; font-family:inherit; }
-.summary p{ margin:0; color:var(--dim); font-size:14.5px; }
-.summary p b{ color:var(--text); font-weight:800; font-size:18px; display:block; }
+.summary{ display:flex; align-items:center; gap:16px; margin:18px 2px; }
+.ring{ width:62px; height:62px; flex:none; }
+.ring circle{ fill:none; stroke-width:2.5; }
+.ring .bg{ stroke:rgba(255,255,255,.14); }
+.ring .fg{ stroke:#fff; stroke-linecap:butt; transition:stroke-dashoffset .4s; transform:rotate(-90deg); transform-origin:50% 50%; filter:drop-shadow(0 0 4px rgba(255,255,255,.7)); }
+.ring text{ fill:var(--text); font-size:19px; font-weight:500; text-anchor:middle; dominant-baseline:central; font-family:var(--serif); }
+.summary p{ margin:0; color:var(--dim); font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
+.summary p b{ color:var(--text); font-family:var(--serif); font-weight:500; font-size:24px; display:block; letter-spacing:.02em; text-transform:none; }
 
-h2{ font-weight:800; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ice); margin:22px 4px 8px; }
+h2{ font-weight:700; font-size:10.5px; letter-spacing:.32em; text-transform:uppercase; color:var(--dim); margin:28px 2px 10px; }
 
-.list{ display:flex; flex-direction:column; gap:10px; }
+.list{ display:flex; flex-direction:column; gap:8px; }
 .habit{
   display:flex; align-items:center; gap:12px; background:var(--panel); border-radius:var(--r);
-  padding:12px 12px 12px 14px; border:1px solid var(--line); border-left:4px solid var(--c, var(--ice));
+  padding:14px 12px 14px 16px; border:1px solid var(--line); border-left:2px solid var(--c, #fff);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
 }
 .habit .info{ flex:1; min-width:0; cursor:pointer; }
-.habit .name{ font-size:16.5px; font-weight:700; overflow-wrap:anywhere; }
-.habit .meta{ color:var(--dim); font-size:13px; display:flex; gap:10px; flex-wrap:wrap; font-weight:600; }
-.habit .meta .streak{ color:var(--ice2); }
-.habit.off{ opacity:.5; }
+.habit .name{ font-size:16px; font-weight:700; overflow-wrap:anywhere; letter-spacing:.01em; }
+.habit .meta{ color:var(--dim); font-size:11px; display:flex; gap:12px; flex-wrap:wrap; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-top:2px; }
+.habit .meta .streak{ color:var(--lamp); }
+.habit.off{ opacity:.4; }
 .check{
-  width:46px; height:46px; border-radius:50%; flex:none; border:2px solid var(--c, var(--ice));
-  display:grid; place-items:center; transition:background .2s, transform .15s, box-shadow .2s;
+  width:44px; height:44px; border-radius:50%; flex:none; border:1.5px solid rgba(255,255,255,.55);
+  display:grid; place-items:center; transition:background .2s, transform .15s, box-shadow .2s, border-color .2s;
 }
-.check svg{ width:24px; height:24px; stroke:var(--bg); stroke-width:3.2; fill:none; opacity:0; transition:opacity .2s; }
-.check.done{ background:var(--c, var(--ice)); box-shadow:0 0 18px color-mix(in srgb, var(--c, var(--ice)) 55%, transparent); }
+.check svg{ width:22px; height:22px; stroke:#050506; stroke-width:3.2; fill:none; opacity:0; transition:opacity .2s; }
+.check.done{ background:#fff; border-color:#fff; box-shadow:0 0 22px rgba(255,255,255,.45); }
 .check.done svg{ opacity:1; }
 .check:active{ transform:scale(.92); }
 .check.pop{ animation:pop .35s ease; }
 @keyframes pop{ 50%{ transform:scale(1.18); } }
 
-.empty{ text-align:center; color:var(--dim); padding:28px 16px; background:var(--panel); border-radius:var(--r); border:1px solid var(--line); }
-.empty b{ display:block; color:var(--text); font-weight:800; font-size:18px; margin-bottom:6px; }
+.empty{ text-align:center; color:var(--dim); padding:30px 16px; background:var(--panel); border-radius:var(--r); border:1px solid var(--line); }
+.empty b{ display:block; color:var(--text); font-family:var(--serif); font-weight:500; font-size:26px; margin-bottom:6px; }
 
-.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:13px 18px; border-radius:14px;
-  background:linear-gradient(180deg, #bfe6ff, var(--ice)); color:#06111f; font-weight:800; font-size:15px; }
-.btn.ghost{ background:transparent; color:var(--ice2); border:1px solid rgba(143,208,255,.45); font-weight:700; }
-.btn.danger{ background:transparent; color:var(--bad); border:1px solid var(--bad); font-weight:700; }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:15px 18px; border-radius:var(--r);
+  background:#fff; color:#050506; font-weight:800; font-size:12.5px; letter-spacing:.24em; text-transform:uppercase; }
+.btn.ghost{ background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.35); }
+.btn.danger{ background:transparent; color:#ff6b62; border:1px solid var(--blood); }
 .btn.wide{ width:100%; }
 .add-row{ margin-top:14px; }
 
 /* Woche */
 .week{ background:var(--panel); border-radius:var(--r); padding:10px; border:1px solid var(--line); overflow-x:auto; }
 .week table{ width:100%; border-collapse:collapse; }
-.week th{ font-weight:700; color:var(--dim); font-size:12.5px; padding:4px 2px; }
-.week th.today{ color:var(--ice); }
+.week th{ font-weight:700; color:var(--dim); font-size:11px; padding:4px 2px; letter-spacing:.08em; }
+.week th.today{ color:#fff; }
 .week td{ padding:5px 2px; text-align:center; border-top:1px solid var(--line); }
-.week td.n{ text-align:left; padding-right:8px; max-width:120px; font-size:14.5px; font-weight:700; overflow-wrap:anywhere; }
-.cell{ width:30px; height:30px; border-radius:9px; border:1.5px solid var(--c, var(--ice)); display:inline-grid; place-items:center; }
-.cell.done{ background:var(--c, var(--ice)); }
-.cell.done::after{ content:''; width:10px; height:5px; border:solid var(--bg); border-width:0 0 2.5px 2.5px; transform:rotate(-45deg) translate(1px,-1px); }
-.cell.off{ border-style:dashed; opacity:.35; }
-.cell.future{ opacity:.12; cursor:default; }
-.week .cnt{ color:var(--dim); font-size:12.5px; font-weight:700; }
+.week td.n{ text-align:left; padding-right:8px; max-width:120px; font-size:14px; font-weight:700; overflow-wrap:anywhere; }
+.cell{ width:30px; height:30px; border-radius:2px; border:1px solid rgba(255,255,255,.45); display:inline-grid; place-items:center; }
+.cell.done{ background:var(--c, #fff); border-color:var(--c, #fff); }
+.cell.done::after{ content:''; width:10px; height:5px; border:solid #050506; border-width:0 0 2.5px 2.5px; transform:rotate(-45deg) translate(1px,-1px); }
+.cell.off{ border-style:dashed; opacity:.3; }
+.cell.future{ opacity:.1; cursor:default; }
+.week .cnt{ color:var(--dim); font-size:12px; font-weight:700; }
 
 /* Statistik */
 .card{ background:var(--panel); border-radius:var(--r); padding:14px; border:1px solid var(--line); }
-.stat{ border-left:4px solid var(--c); }
+.stat{ border-left:2px solid var(--c); }
 .stat .head{ display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
-.stat .head b{ font-weight:800; font-size:16.5px; }
-.nums{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:10px 0; text-align:center; }
-.nums div{ background:var(--panel2); border-radius:10px; padding:8px 4px; }
-.nums b{ display:block; font-weight:800; font-size:20px; color:var(--ice2); }
-.nums span{ font-size:11.5px; color:var(--dim); font-weight:600; }
+.stat .head b{ font-weight:800; font-size:16px; }
+.nums{ display:grid; grid-template-columns:repeat(3,1fr); gap:0; margin:12px 0; text-align:center; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.nums div{ padding:10px 4px; }
+.nums div + div{ border-left:1px solid var(--line); }
+.nums b{ display:block; font-family:var(--serif); font-weight:500; font-size:28px; line-height:1.1; color:#fff; }
+.nums span{ font-size:9.5px; color:var(--dim); font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
 .heat{ display:grid; grid-auto-flow:column; grid-template-rows:repeat(7, 1fr); gap:3px; }
-.heat i{ aspect-ratio:1; border-radius:3px; background:var(--line); }
-.heat i.d{ background:var(--c); }
+.heat i{ aspect-ratio:1; border-radius:1px; background:rgba(255,255,255,.07); }
+.heat i.d{ background:var(--c); box-shadow:0 0 6px color-mix(in srgb, var(--c) 50%, transparent); }
 .heat i.o{ background:transparent; outline:1px dashed var(--line); outline-offset:-1px; }
 .heat i.f{ visibility:hidden; }
-.heat-lbl{ display:flex; justify-content:space-between; color:var(--dim); font-size:11.5px; margin-top:4px; font-weight:600; }
-.arcgrid{ display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; margin-top:10px; }
-.arcgrid i{ aspect-ratio:1; border-radius:5px; background:rgba(255,255,255,.06); position:relative; }
-.arcgrid i[data-l="1"]{ background:#1d3b5e; } .arcgrid i[data-l="2"]{ background:#2e6596; }
-.arcgrid i[data-l="3"]{ background:#5aa7e0; } .arcgrid i[data-l="4"]{ background:#cfeaff; box-shadow:0 0 8px rgba(207,234,255,.6); }
-.arcgrid i.today{ outline:2px solid var(--ice); outline-offset:1px; }
+.heat-lbl{ display:flex; justify-content:space-between; color:var(--dim); font-size:10px; margin-top:6px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+.arcgrid{ display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; margin-top:12px; }
+.arcgrid i{ aspect-ratio:1; border-radius:1px; background:rgba(255,255,255,.06); position:relative; }
+.arcgrid i[data-l="1"]{ background:#2a2c31; } .arcgrid i[data-l="2"]{ background:#55585f; }
+.arcgrid i[data-l="3"]{ background:#9a9da3; } .arcgrid i[data-l="4"]{ background:#fff; box-shadow:0 0 10px rgba(255,255,255,.55); }
+.arcgrid i.today{ outline:1px solid var(--lamp); outline-offset:2px; }
 .arcgrid i.fut{ background:transparent; outline:1px dashed var(--line); outline-offset:-1px; }
-.legend{ display:flex; align-items:center; gap:4px; justify-content:flex-end; color:var(--dim); font-size:11.5px; margin-top:8px; font-weight:600; }
-.legend i{ width:11px; height:11px; border-radius:3px; display:inline-block; }
+.legend{ display:flex; align-items:center; gap:4px; justify-content:flex-end; color:var(--dim); font-size:10px; margin-top:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+.legend i{ width:11px; height:11px; border-radius:1px; display:inline-block; }
 
 /* Leiste */
 nav.bar{ position:fixed; left:0; right:0; bottom:0; height:calc(var(--nav-h) + env(safe-area-inset-bottom));
-  padding-bottom:env(safe-area-inset-bottom); background:rgba(10,16,30,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  padding-bottom:env(safe-area-inset-bottom); background:rgba(5,5,6,.9); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
   border-top:1px solid var(--line); display:flex; justify-content:center; z-index:20; }
-nav.bar button{ flex:1; max-width:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-  color:var(--dim); font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
-nav.bar button svg{ width:24px; height:24px; }
-nav.bar button.on{ color:var(--ice); }
+nav.bar button{ flex:1; max-width:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  color:rgba(236,235,231,.4); font-size:9.5px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; }
+nav.bar button svg{ width:22px; height:22px; }
+nav.bar button.on{ color:#fff; }
 
 /* Fenster */
-.backdrop{ position:fixed; inset:0; background:rgba(2,5,12,.7); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
+.backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
 .backdrop[hidden]{ display:none; }
-.sheet{ background:var(--panel); width:100%; max-width:560px; border-radius:24px 24px 0 0; padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+.sheet{ background:#0d0d0f; width:100%; max-width:560px; border-radius:10px 10px 0 0; padding:22px 18px calc(20px + env(safe-area-inset-bottom));
   max-height:92vh; overflow:auto; animation:up .22s ease; border:1px solid var(--line); border-bottom:0; }
-@media (min-width:600px){ .backdrop{ align-items:center; } .sheet{ border-radius:24px; border-bottom:1px solid var(--line); } }
+@media (min-width:600px){ .backdrop{ align-items:center; } .sheet{ border-radius:6px; border-bottom:1px solid var(--line); } }
 @keyframes up{ from{ transform:translateY(30px); opacity:0; } }
-.sheet h3{ margin:0 0 14px; font-weight:800; font-size:21px; }
-.field{ margin-bottom:14px; }
-.field > label{ display:block; color:var(--dim); font-size:13.5px; font-weight:700; margin-bottom:6px; }
+.sheet h3{ margin:0 0 16px; font-family:var(--serif); font-weight:500; font-size:28px; letter-spacing:.08em; text-transform:uppercase; }
+.field{ margin-bottom:16px; }
+.field > label{ display:block; color:var(--dim); font-size:10.5px; font-weight:800; letter-spacing:.24em; text-transform:uppercase; margin-bottom:8px; }
 .field input[type=text], .field input[type=date], .field textarea{
-  width:100%; padding:12px; border-radius:12px; border:1px solid var(--line); background:var(--bg); font-size:16px; color-scheme:dark; }
+  width:100%; padding:12px; border-radius:var(--r); border:1px solid var(--line); background:#050506; font-size:16px; color-scheme:dark; }
 .field textarea{ resize:vertical; min-height:70px; }
 .seg{ display:flex; gap:6px; flex-wrap:wrap; }
-.seg button{ padding:9px 12px; border-radius:999px; border:1px solid var(--line); font-size:14px; font-weight:700; }
-.seg button.on{ background:var(--ice); color:#06111f; border-color:var(--ice); }
+.seg button{ padding:9px 12px; border-radius:var(--r); border:1px solid var(--line); font-size:13px; font-weight:700; }
+.seg button.on{ background:#fff; color:#050506; border-color:#fff; }
 .days button{ width:42px; padding:9px 0; }
 .chips{ display:flex; gap:6px; flex-wrap:wrap; }
-.chips button{ padding:8px 12px; border-radius:999px; border:1px dashed rgba(143,208,255,.5); font-size:14px; font-weight:700; color:var(--ice2); }
-.chips button.on{ border-style:solid; background:rgba(143,208,255,.16); }
+.chips button{ padding:8px 12px; border-radius:var(--r); border:1px dashed rgba(255,255,255,.3); font-size:13px; font-weight:700; color:var(--ice2); }
+.chips button.on{ border-style:solid; border-color:#fff; background:rgba(255,255,255,.1); color:#fff; }
 .chips button.on::before{ content:'✓ '; }
 .colors{ display:flex; gap:10px; flex-wrap:wrap; }
-.colors button{ width:34px; height:34px; border-radius:50%; background:var(--c); outline-offset:3px; }
-.colors button.on{ outline:2px solid var(--text); }
+.colors button{ width:32px; height:32px; border-radius:50%; background:var(--c); outline-offset:3px; }
+.colors button.on{ outline:1.5px solid #fff; }
 .row-btns{ display:flex; gap:10px; margin-top:8px; }
 .row-btns .btn{ flex:1; }
 .small-btns{ display:flex; gap:8px; margin-top:12px; }
-.small-btns .btn{ flex:1; padding:9px 8px; font-size:13px; }
-.note{ color:var(--dim); font-size:13.5px; }
+.small-btns .btn{ flex:1; padding:10px 6px; font-size:10.5px; letter-spacing:.16em; }
+.note{ color:var(--dim); font-size:13px; }
 .toast{ position:fixed; left:50%; bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px); transform:translateX(-50%);
-  background:var(--ice2); color:#06111f; padding:10px 16px; border-radius:999px; font-size:15px; font-weight:700; z-index:60; box-shadow:var(--shadow);
+  background:#fff; color:#050506; padding:11px 18px; border-radius:var(--r); font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; z-index:60; box-shadow:0 0 30px rgba(255,255,255,.25);
   max-width:calc(100% - 32px); text-align:center; }
 .toast[hidden]{ display:none; }
-.footer{ text-align:center; color:var(--dim); font-size:12px; margin:28px 0 8px; }
+.footer{ text-align:center; color:rgba(236,235,231,.35); font-size:10.5px; margin:30px 0 8px; letter-spacing:.06em; }
 
 /* Start */
-.intro{ text-align:center; padding:24px 6px 0; }
-.intro .flake{ width:64px; height:64px; color:var(--ice); filter:drop-shadow(0 0 16px rgba(143,208,255,.6)); }
-.intro h2{ font-size:34px; letter-spacing:-.02em; text-transform:none; color:var(--text); margin:10px 0 6px; }
-.intro p{ color:var(--dim); margin:0 0 20px; }
+.intro{ text-align:center; padding:34px 4px 0; }
+.intro .flake{ display:none; }
+.intro .kicker{ font-size:10.5px; font-weight:800; letter-spacing:.4em; text-transform:uppercase; color:var(--dim); }
+.intro h2{ font-family:var(--serif); font-size:54px; font-weight:500; letter-spacing:.14em; line-height:1; text-transform:uppercase; color:#fff; margin:14px 0 10px; }
+.intro .rule{ width:120px; height:1px; margin:0 auto 16px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); }
+.intro p{ color:var(--dim); margin:0 0 26px; font-family:var(--serif); font-size:20px; font-style:italic; }
 .intro .card{ text-align:left; }
 </style>
 </head>
@@ -210,7 +234,7 @@ nav.bar button.on{ color:var(--ice); }
 <div id="snow" aria-hidden="true"></div>
 <div class="wrap">
   <header class="top">
-    <h1 id="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5M4 10.2l3.8-.7L6.5 6M20 13.8l-3.8.7 1.3 3.5M4 13.8l3.8.7L6.5 18M20 10.2l-3.8-.7L17.5 6"/></svg><span>Winterwandel</span></h1>
+    <h1 id="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5M4 10.2l3.8-.7L6.5 6M20 13.8l-3.8.7 1.3 3.5M4 13.8l3.8.7L6.5 18M20 10.2l-3.8-.7L17.5 6"/></svg><span>Winter Arc</span></h1>
     <button class="icon-btn" id="add-top" aria-label="Gewohnheit hinzufügen">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     </button>
@@ -228,7 +252,7 @@ nav.bar button.on{ color:var(--ice); }
   <button data-tab="week">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Woche</button>
   <button data-tab="stats">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-10 4 6 3-4 5 8z"/></svg>Mein Wandel</button>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-10 4 6 3-4 5 8z"/></svg>Mein Arc</button>
 </nav>
 
 <div class="backdrop" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
@@ -238,22 +262,24 @@ nav.bar button.on{ color:var(--ice); }
 'use strict';
 const VERSION = '2.0.0';
 const KEY = 'winterarc_v1';
-const COLORS = ['#8fd0ff','#7fe0c4','#b9a7ff','#ff9fb2','#ffd08a','#6fa8ff','#e8f1fb','#9be37a'];
+const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const SUGGEST = ['Vor 7 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
 const QUOTES = [
-  'Disziplin ist, das zu tun, was du dir vorgenommen hast – auch wenn die Lust weg ist.',
-  'Während andere auf den Frühling warten, baust du dich neu.',
-  'Kleine Schritte jeden Tag schlagen große Pläne einmal im Monat.',
-  'Du musst nicht motiviert sein. Du musst nur anfangen.',
-  'Der Winter ist kalt. Dein Wille nicht.',
-  'Niemand sieht das Training im Dunkeln. Alle sehen das Ergebnis im Licht.',
-  'Ein verpasster Tag ist ein Ausrutscher. Zwei sind ein neues Muster. Steh wieder auf.',
-  'Heute zählt. Nicht gestern, nicht morgen.',
-  'Dein zukünftiges Ich schaut dir gerade zu.',
-  'Ruhe ist kein Rückschritt. Aufgeben schon.',
+  'Disziplin schlägt Motivation. Jeden Tag.',
+  'Während sie schlafen, arbeitest du.',
+  'Niemand kommt, um dich zu retten. Steh auf.',
+  'Werde in der Stille stärker. Lass den Frühling sprechen.',
+  'Du musst keine Lust haben. Du musst es nur tun.',
+  'Der Winter ist kalt. Dein Wille ist kälter.',
+  'Keine Ausreden. Keine Abkürzungen.',
+  'Ein verpasster Tag ist ein Ausrutscher. Zwei sind eine Entscheidung.',
+  'Werde unerkennbar.',
+  'Stille Arbeit. Laute Ergebnisse.',
   'Stark wird man nicht an guten Tagen.',
+  'Heute zählt. Morgen ist eine Ausrede.',
+  'Dein altes Ich hätte jetzt aufgehört.',
   'Mach es einfach. Dann mach es wieder.'
 ];
 
@@ -284,7 +310,7 @@ function weekStartOf(d){ const x = new Date(d); x.setHours(0,0,0,0); const diff 
 function longDate(d){ return WD_SHORT[d.getDay()] + ', ' + d.getDate() + '. ' + MONTHS[d.getMonth()]; }
 const shortDate = d => d.getDate() + '.' + (d.getMonth()+1) + '.';
 
-/* ---------- Winterwandel ---------- */
+/* ---------- Arc ---------- */
 function arcInfo(){
   const a = state.arc; if(!a) return null;
   const s = fromKey(a.start), e = addDays(s, a.days - 1), t = today();
@@ -425,7 +451,7 @@ function renderSetup(){
   const custom = state.habits.length ? '' :
     '<div class="field"><label>Womit startest du? (später änderbar)</label><div class="chips" id="su-chips">'
     + SUGGEST.map(s => '<button data-s="' + esc(s) + '" class="' + (setupPick.has(s) ? 'on' : '') + '">' + esc(s) + '</button>').join('') + '</div></div>';
-  $('#view').innerHTML = '<div class="intro">' + FLAKE + '<h2>Dein Winterwandel</h2><p>Die dunkle Jahreszeit gehört dir. Leg fest, wie lange – und was du jeden Tag tust.</p>'
+  $('#view').innerHTML = '<div class="intro"><div class="kicker">' + new Date().getFullYear() + '</div><h2>Winter Arc.</h2><div class="rule"></div><p>Während die anderen warten, wirst du jemand anderes.</p>'
     + '<div class="card">'
     + '<div class="field"><label for="su-start">Start</label><input id="su-start" type="date" value="' + setupStart + '"></div>'
     + '<div class="field"><label>Dauer</label><div class="seg" id="su-days">' + [[30,'30 Tage'],[60,'60 Tage'],[90,'90 Tage'],[0,'Bis Silvester']].map(([v,l]) =>
@@ -433,7 +459,7 @@ function renderSetup(){
       + '<p class="note" style="margin:8px 0 0">Ende: ' + longDate(end) + ' ' + end.getFullYear() + ' · ' + setupDays + ' Tage</p></div>'
     + '<div class="field"><label for="su-why">Mein Warum <span style="font-weight:500">(freiwillig)</span></label><textarea id="su-why" maxlength="160" placeholder="z. B. Ich will im Frühling stärker, ruhiger und fitter sein.">' + esc(setupWhy) + '</textarea></div>'
     + custom
-    + '<button class="btn wide" data-act="arc-go">Winterwandel starten</button>'
+    + '<button class="btn wide" data-act="arc-go">Arc starten</button>'
     + '</div></div>';
   $('#su-start').onchange = e => { if(e.target.value){ setupStart = e.target.value; if(isNyeSel) setupDays = untilNye(); renderSetup(); } };
   $('#su-why').oninput = e => setupWhy = e.target.value;
@@ -445,7 +471,7 @@ function untilNye(){ const s = fromKey(setupStart || dkey(today())); let ny = ne
 function arcGo(){
   state.arc = { start:setupStart, days:Math.max(1, setupDays), why:(setupWhy || '').trim().slice(0,160) };
   if(!state.habits.length) for(const s of SUGGEST) if(setupPick.has(s)) addHabit(s, s === 'Training' ? { mode:'times', times:4 } : null);
-  save(); tab = 'today'; viewDay = today(); render(); toast('Los geht’s. Tag 1 – der wichtigste.');
+  save(); tab = 'today'; viewDay = today(); render(); toast('Tag 1. Keine Ausreden.');
 }
 
 function arcCardHtml(){
@@ -453,7 +479,7 @@ function arcCardHtml(){
   let head, big, pct;
   if(A.before){ head = 'Startet bald'; big = 'in ' + (1 - A.day) + (1 - A.day === 1 ? ' Tag' : ' Tagen'); pct = 0; }
   else if(A.over){ head = 'Geschafft'; big = A.total + ' <small>von ' + A.total + ' Tagen</small>'; pct = 1; }
-  else { head = 'Winterwandel · ' + shortDate(A.start) + ' – ' + shortDate(A.end); big = 'Tag ' + A.day + ' <small>von ' + A.total + '</small>'; pct = A.day / A.total; }
+  else { head = 'Winter Arc · ' + shortDate(A.start) + ' – ' + shortDate(A.end); big = 'Tag ' + A.day + ' <small>von ' + A.total + '</small>'; pct = A.day / A.total; }
   return '<div class="arc"><div class="day">' + head + '</div><div class="big">' + big + '</div>'
     + '<div class="bar"><b style="width:' + Math.round(pct*100) + '%"></b></div>'
     + '<div class="row"><div><b>' + (A.over ? 0 : A.before ? A.total : A.left) + '</b><span>Tage übrig</span></div><div><b>' + S.perfect + '</b><span>perfekte Tage</span></div><div><b>' + S.streak + '</b><span>perfekt am Stück</span></div></div>'
@@ -463,11 +489,11 @@ function arcCardHtml(){
 }
 function quoteHtml(){
   const n = Math.floor(today() / 864e5);
-  return '<p class="quote"><b>Heute:</b> ' + QUOTES[n % QUOTES.length] + '</p>';
+  return '<p class="quote"><b>Regel für heute</b>' + QUOTES[n % QUOTES.length] + '</p>';
 }
 
 function emptyHtml(){
-  return '<div class="empty"><b>Noch keine Gewohnheiten</b>Was gehört zu deinem Winterwandel? Training, früh aufstehen, lesen …<div class="add-row"><button class="btn" data-act="add">+ Gewohnheit anlegen</button></div></div>';
+  return '<div class="empty"><b>Noch leer.</b>Ohne Plan kein Arc. Training, früh aufstehen, lesen – leg los.<div class="add-row"><button class="btn" data-act="add">+ Gewohnheit anlegen</button></div></div>';
 }
 
 function renderToday(){
@@ -487,7 +513,7 @@ function renderToday(){
   }
   const done = due.filter(h => isDone(h, k)).length, total = due.length;
   const pct = total ? done/total : 0, C = 2*Math.PI*26;
-  const msg = !total ? 'Heute ist nichts fällig.' : done === total ? 'Perfekter Tag. ❄️' : done === 0 ? 'Fang mit dem Ersten an.' : 'Bleib dran.';
+  const msg = !total ? 'Heute ist nichts fällig.' : done === total ? 'Perfekter Tag.' : done === 0 ? 'Keine Ausreden.' : 'Nicht aufhören.';
   html += '<div class="summary"><svg class="ring" viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="26"/><circle class="fg" cx="32" cy="32" r="26" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C*(1-pct)) + '"/><text x="32" y="32">' + done + '/' + total + '</text></svg>'
     + '<p><b>' + msg + '</b>' + (total ? Math.round(pct*100) + ' % erledigt' : '') + '</p></div>';
   html += '<div class="list">' + due.map(h => habitRow(h, k)).join('') + '</div>';
@@ -548,9 +574,9 @@ function renderStats(){
     grid += '<i data-l="' + l + '" class="' + (k === dkey(t) ? 'today' : '') + '" title="Tag ' + (i+1) + ' · ' + shortDate(d) + (s === null ? '' : ' · ' + Math.round(s*100) + ' %') + '"></i>';
   }
   let html = arcCardHtml()
-    + '<h2>Jeder Tag deines Winterwandels</h2><div class="card"><div class="note">' + shortDate(A.start) + A.start.getFullYear() + ' – ' + shortDate(A.end) + A.end.getFullYear() + ' · ein Feld = ein Tag</div>'
+    + '<h2>Jeder Tag zählt</h2><div class="card"><div class="note">' + shortDate(A.start) + A.start.getFullYear() + ' – ' + shortDate(A.end) + A.end.getFullYear() + ' · ein Feld = ein Tag</div>'
     + '<div class="arcgrid">' + grid + '</div>'
-    + '<div class="legend">wenig <i style="background:#1d3b5e"></i><i style="background:#2e6596"></i><i style="background:#5aa7e0"></i><i style="background:#cfeaff"></i> perfekt</div></div>';
+    + '<div class="legend">wenig <i style="background:#2a2c31"></i><i style="background:#55585f"></i><i style="background:#9a9da3"></i><i style="background:#fff"></i> perfekt</div></div>';
   const hs = activeHabits();
   if(hs.length){
     const WEEKS = 17, start = addDays(weekStartOf(t), -7*(WEEKS-1));
@@ -659,9 +685,9 @@ function newArc(){
     + '<div class="row-btns"><button class="btn ghost" data-act="cancel">Abbrechen</button><button class="btn" data-act="new-arc-ok">Neu starten</button></div>');
 }
 function exportData(){
-  const blob = new Blob([JSON.stringify({ app:'winterwandel', version:VERSION, exported:new Date().toISOString(), ...state }, null, 1)], { type:'application/json' });
+  const blob = new Blob([JSON.stringify({ app:'winter-arc', version:VERSION, exported:new Date().toISOString(), ...state }, null, 1)], { type:'application/json' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'Winterwandel-Sicherung-' + dkey(today()) + '.json';
+  a.href = URL.createObjectURL(blob); a.download = 'Winter-Arc-Sicherung-' + dkey(today()) + '.json';
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   toast('Sicherung gespeichert.');
 }
@@ -702,7 +728,7 @@ document.addEventListener('click', e => {
     if(on && navigator.vibrate) navigator.vibrate(12);
     render();
     if(on){ const nb = document.querySelector('[data-act=toggle][data-id="' + h.id + '"][data-k="' + k + '"]'); if(nb) nb.classList.add('pop');
-      if(!before && perfect(fromKey(k))) toast(k === dkey(today()) ? 'Perfekter Tag! ❄️' : 'Tag nachgetragen – perfekt.'); }
+      if(!before && perfect(fromKey(k))) toast(k === dkey(today()) ? 'Perfekter Tag. Morgen wieder.' : 'Nachgetragen. Perfekt.'); }
   }
   else if(act === 'add') editHabit(null);
   else if(act === 'edit') editHabit(b.dataset.id);

@@ -1,14 +1,14 @@
 {
- "name": "Winterwandel",
- "short_name": "Winterwandel",
- "description": "Dein Winterwandel: Gewohnheiten abhaken, Tage zählen, dranbleiben.",
+ "name": "Winter Arc",
+ "short_name": "Winter Arc",
+ "description": "Winter Arc: Keine Ausreden. Jeden Tag abhaken. Bis zum Ende.",
  "lang": "de",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
  "orientation": "portrait-primary",
- "background_color": "#070b14",
- "theme_color": "#070b14",
+ "background_color": "#050506",
+ "theme_color": "#050506",
  "icons": [
   { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
   { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }

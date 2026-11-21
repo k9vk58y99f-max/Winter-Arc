@@ -428,6 +428,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 .coin.big{ width:170px !important; box-shadow:none !important; filter:drop-shadow(0 0 40px var(--red-glow)); }
 .coin.big.master{ filter:drop-shadow(0 0 50px rgba(224,53,45,.8)); }
 .rule-i.wl::before, .rule-i[style*="counter-increment:none"]::before{ content:none; }
+.mood{ background-position:center 35% !important; }
 </style>
 </head>
 <body>
@@ -464,7 +465,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.8.0';
+const VERSION = '3.8.1';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
@@ -831,7 +832,7 @@ function wolfInfo(){
 }
 function quoteHtml(){
   const n = Math.floor(today() / 864e5);
-  return '<div class="mood" style="background-image:url(img/mood/' + (n % 6 + 1) + '.webp)"><div class="mood-txt"><b>Regel für heute</b>' + QUOTES[n % QUOTES.length] + '</div></div>';
+  return '<div class="mood" style="background-image:url(img/mood/' + (n % 10 + 1) + '.webp)"><div class="mood-txt"><b>Regel für heute</b>' + QUOTES[n % QUOTES.length] + '</div></div>';
 }
 
 function emptyHtml(){

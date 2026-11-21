@@ -465,7 +465,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.9.1';
+const VERSION = '3.10.0';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
@@ -729,14 +729,14 @@ function render(){
 }
 
 /* Erster Start: einrichten */
-let setupPick = new Set(['Training','2 Liter Wasser','10 Seiten lesen']);
+let setupPick = new Set();
 let setupDays = 90, setupStart = null, setupWhy = '';
 function renderSetup(){
   const t = today();
   if(!setupStart) setupStart = dkey(t);
   const end = addDays(fromKey(setupStart), setupDays - 1);
   const custom = state.habits.length ? '' :
-    '<div class="field"><label>Womit startest du? (später änderbar)</label><div class="chips" id="su-chips">'
+    '<div class="field"><label>Womit startest du?</label><p class="note" style="margin:-2px 0 8px">Tipp an, was du jeden Tag machen willst. Du kannst später jederzeit eigene Gewohnheiten anlegen oder ändern.</p><div class="chips" id="su-chips">'
     + SUGGEST.map(s => '<button data-s="' + esc(s) + '" class="' + (setupPick.has(s) ? 'on' : '') + '">' + esc(s) + '</button>').join('') + '</div></div>';
   $('#view').innerHTML = '<div class="hero"><div class="intro"><div class="kicker">' + new Date().getFullYear() + '</div><h2>Winter Arc.</h2><div class="rule"></div><p>Während die anderen warten, wirst du jemand anderes.</p></div></div><div class="intro">'
     + '<div class="card">'
@@ -1155,8 +1155,8 @@ const GOAL_TEMPLATES = [
   { title:'Mein Leben in Ordnung bringen', why:'Kein Chaos mehr. Ich habe alles im Griff.',
     steps:['Zimmer oder Wohnung komplett ausmisten','Alle offenen Briefe und Rechnungen erledigen','Wichtige Termine machen (Arzt, Amt …)','Feste Schlafenszeit festlegen','Alles Offene aufschreiben – und abarbeiten'],
     habits:[['Bett machen',null],['Aufgaben-Liste abarbeiten',null],['Kein Handy nach 22 Uhr',null]] },
-  { title:'Selbstkontrolle', why:'Ich will meine Energie, meinen Fokus und mein Selbstvertrauen zurück – für das echte Leben und eine echte Frau.',
-    steps:['Websites für Erwachsene sperren: Einstellungen → Bildschirmzeit → Inhalte & Datenschutz → Store-, Web-, Siri-Inhalte → Webinhalte → „Websites für Erwachsene begrenzen“','Bildschirmzeit-Code von einem Freund setzen lassen','Handy nachts nicht mehr im Schlafzimmer laden','Accounts entfolgen, die dich triggern','Aufschreiben: Wann, wo und warum kommt der Drang?','7 Tage clean','30 Tage clean','90 Tage clean'],
+  { title:'Selbstkontrolle', why:'Ich will Herr über meine Gewohnheiten sein – nicht umgekehrt. Mehr Energie, mehr Fokus, mehr Selbstvertrauen.',
+    steps:['Aufschreiben, wovon du loskommen willst – und warum','Apps oder Seiten, die dich runterziehen, mit Bildschirmzeit begrenzen','Bildschirmzeit-Code von einem Freund setzen lassen','Handy nachts nicht mehr im Schlafzimmer laden','Accounts entfolgen, die dir nicht guttun','Aufschreiben: Wann und wo wirst du schwach?','7 Tage durchgehalten','30 Tage durchgehalten','90 Tage durchgehalten'],
     habits:[['Clean geblieben',null],['Kalt duschen',null],['Kein Handy nach 22 Uhr',null]], counter:'Selbstkontrolle' },
   { title:'Mehr Geld auf dem Konto', why:'Ich will Rücklagen statt Sorgen.',
     steps:['Alle Ausgaben eines Monats aufschreiben','Unnötige Abos kündigen','Sparziel festlegen','Dauerauftrag aufs Sparkonto einrichten'],
@@ -1256,7 +1256,7 @@ function countersHtml(){
   }).join('');
 }
 function counterNew(){
-  openSheet('<h3>Clean-Zähler</h3><p class="note" style="margin:0 0 14px">Zählt jeden Tag, an dem du durchhältst. Bei einem Rückfall fängst du neu an – dein Rekord bleibt.</p>'
+  openSheet('<h3>Clean-Zähler</h3><p class="note" style="margin:0 0 10px"><b style="color:#fff">Selbstkontrolle</b> heißt: Du lässt etwas weg, das dir Zeit, Energie oder Fokus raubt – zum Beispiel zu viel Handy, Social Media, Zocken, Alkohol oder Süßes. Was genau, entscheidest du selbst.</p><p class="note" style="margin:0 0 14px">Der Zähler zählt jeden Tag, an dem du durchhältst. Bei einem Rückfall fängst du neu an – dein Rekord bleibt.</p>'
     + '<div class="field"><label>Wovon willst du loskommen?</label><div class="chips" id="c-pre">' + COUNTER_PRESETS.filter(n => !state.counters.some(c => c.name === n)).map(n => '<button data-n="' + esc(n) + '">' + esc(n) + '</button>').join('') + '</div></div>'
     + '<div class="field"><label for="c-name">Name</label><input id="c-name" type="text" maxlength="60" placeholder="z. B. Selbstkontrolle"></div>'
     + '<div class="field"><label for="c-start">Clean seit</label><input id="c-start" type="date" value="' + dkey(today()) + '" max="' + dkey(today()) + '"></div>'
@@ -1665,7 +1665,7 @@ function whatsNew(){
     + '<li><b>Abzeichen und Ränge:</b> für perfekte Tage und für jeden Clean-Zähler – von „Erster Schritt“ bis „Tausend“ und darüber hinaus. Zu sehen unter „Mein Arc“.</li>'
     + '<li><b>Um 6 Uhr aufstehen</b> statt vor 7. „Neu beginnen“ fragt jetzt zweimal nach.</li>'
     + '<li><b>Sicher speichern:</b> alles wird jetzt doppelt gespeichert, dazu jeden Tag eine Kopie. Sicherung direkt in iCloud. „✓ Gespeichert“ steht unten auf jeder Seite.</li>'
-    + '<li><b>Clean-Zähler:</b> zählt deine Tage in Selbstkontrolle (oder ohne Alkohol, Zocken …), mit Rekord und Notfallplan. Neue Ziel-Vorlage „Selbstkontrolle“.</li>'
+    + '<li><b>Clean-Zähler:</b> zählt deine Tage, an denen du auf etwas verzichtest, das dir nicht guttut, mit Rekord und Notfallplan. Neue Ziel-Vorlage „Selbstkontrolle“.</li>'
     + '<li><b>Ziele:</b> eigenes Ziel mit Warum und Schritten – mit Vorlagen wie „Eine Freundin finden“.</li>'
     + '<li><b>Aufgaben:</b> alles, was du erledigen musst, unter „Heute“. Offenes bleibt stehen, bis es erledigt ist.</li>'
     + '<li><b>Meine Regeln:</b> deine Winter-Arc-Regeln, oder die 10 Regeln übernehmen.</li>'

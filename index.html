@@ -416,6 +416,18 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 .week .cell.done{ background:var(--green) !important; border-color:var(--green) !important; box-shadow:0 0 10px var(--green-glow); }
 .stat{ border-left:2px solid rgba(255,255,255,.25) !important; }
 .heat i.d{ background:var(--green) !important; box-shadow:0 0 6px var(--green-glow) !important; }
+/* Echte Bilder: Wolf-Stufen und Münzen */
+.wolf-av.w1, .wolf-av.w2, .wolf-av.w4, .wolf-av.w5, .wolf.w1, .wolf.w2, .wolf.w4, .wolf.w5{ filter:none !important; }
+.wolf.big.w5{ animation:none; }
+.coin{ width:66px !important; border:0 !important; border-radius:0 !important; box-shadow:none !important;
+  background:url(img/coin/silver.webp) center / contain no-repeat !important; filter:drop-shadow(0 4px 10px rgba(0,0,0,.6)); }
+.coin.master{ background-image:url(img/coin/master.webp) !important; filter:drop-shadow(0 0 12px var(--red-glow)); }
+.coin span{ text-shadow:0 2px 4px #000, 0 0 12px rgba(0,0,0,.8); }
+.coin.lock{ filter:grayscale(1) brightness(.45); opacity:.45; border:0 !important; }
+.coin.lock span{ color:rgba(255,255,255,.5); }
+.coin.big{ width:170px !important; box-shadow:none !important; filter:drop-shadow(0 0 40px var(--red-glow)); }
+.coin.big.master{ filter:drop-shadow(0 0 50px rgba(224,53,45,.8)); }
+.rule-i.wl::before, .rule-i[style*="counter-increment:none"]::before{ content:none; }
 </style>
 </head>
 <body>
@@ -452,7 +464,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.7.4';
+const VERSION = '3.8.0';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
@@ -758,6 +770,7 @@ function roman(n){
   let out = ''; for(const [v, r] of R) while(n >= v){ out += r; n -= v; } return out;
 }
 const coin = (n, cls) => { const r = roman(n), f = r.length <= 2 ? 1 : r.length === 3 ? .82 : r.length === 4 ? .68 : r.length === 5 ? .56 : .46;
+  if(n >= 100 && !(cls || '').includes('lock')) cls = (cls ? cls + ' ' : '') + 'master';
   return '<div class="coin' + (cls ? ' ' + cls : '') + '" title="' + n + '"><span style="--f:' + f + '">' + r + '</span></div>'; };
 function earnedBadges(){
   const out = [], p = arcStats().perfect;
@@ -783,11 +796,11 @@ function badgeCheck(){
 
 /* ---------- Der Wolf wächst mit ---------- */
 const WOLF = [
-  { min:0,   name:'Welpe',        img:'img/wolf.webp', cls:'w1' },
-  { min:7,   name:'Einzelgänger', img:'img/wolf.webp', cls:'w2' },
-  { min:30,  name:'Jäger',        img:'img/wolf.webp', cls:'w3' },
-  { min:100, name:'Alpha',        img:'img/wolf.webp', cls:'w4' },
-  { min:365, name:'Legende',      img:'img/wolf.webp', cls:'w5' }
+  { min:0,   name:'Welpe',        img:'img/wolf/1.webp', cls:'w1' },
+  { min:7,   name:'Einzelgänger', img:'img/wolf/2.webp', cls:'w2' },
+  { min:30,  name:'Jäger',        img:'img/wolf/3.webp', cls:'w3' },
+  { min:100, name:'Alpha',        img:'img/wolf/4.webp', cls:'w4' },
+  { min:365, name:'Legende',      img:'img/wolf/5.webp', cls:'w5' }
 ];
 function wolfStage(p){ let w = WOLF[0]; for(const x of WOLF) if(p >= x.min) w = x; return w; }
 function wolfNext(p){ return WOLF.find(x => x.min > p); }
@@ -812,7 +825,7 @@ function wolfInfo(){
   const p = arcStats().perfect, W = wolfStage(p), N = wolfNext(p);
   openSheet('<div style="text-align:center"><div class="kick">Dein Wolf</div><div class="wolf big ' + W.cls + '" style="background-image:url(' + W.img + ')"></div><h3 style="margin:14px 0 6px">' + W.name + '</h3>'
     + '<p class="note" style="margin:0 0 14px">' + p + ' perfekte Tage</p></div>'
-    + '<div class="rules">' + WOLF.map(x => '<div class="rule-i" style="counter-increment:none"><div class="t" style="' + (p >= x.min ? '' : 'opacity:.35') + '">' + x.name + ' <span class="note">· ab ' + x.min + ' perfekten Tagen</span></div>' + (p >= x.min ? '<span style="color:#ff5a50">✓</span>' : '') + '</div>').join('') + '</div>'
+    + '<div class="rules">' + WOLF.map(x => '<div class="rule-i wl"><span class="wolf-av" style="width:44px;height:44px;background-image:url(' + x.img + ');' + (p >= x.min ? '' : 'filter:grayscale(1) brightness(.4)') + '"></span><div class="t" style="' + (p >= x.min ? '' : 'opacity:.35') + '">' + x.name + ' <span class="note">· ab ' + x.min + ' perfekten Tagen</span></div>' + (p >= x.min ? '<span style="color:#ff5a50">✓</span>' : '') + '</div>').join('') + '</div>'
     + (N ? '<p style="text-align:center;font-family:var(--serif);font-size:20px;margin:16px 0 0">Noch ' + (N.min - p) + ' perfekte Tage bis „' + N.name + '“.</p>' : '<p style="text-align:center;font-family:var(--serif);font-size:20px;margin:16px 0 0">Ganz oben. Bleib da.</p>')
     + '<div class="row-btns" style="margin-top:16px"><button class="btn" data-act="cancel">Weiter</button></div>');
 }
@@ -1627,6 +1640,7 @@ function whatsNew(){
   let seen = null; try{ seen = localStorage.getItem('winterarc_seen_ver'); localStorage.setItem('winterarc_seen_ver', VERSION); }catch(e){}
   if(!seen || seen === VERSION || !state.arc) return;
   openSheet('<h3>Neu in ' + VERSION + '</h3><ul class="news">'
+    + '<li><b>Neue Bilder:</b> dein Wolf in fünf Stufen – vom Welpen bis zur Legende mit Rudel – und geschmiedete Münzen für die Abzeichen. Ab 100 Tagen gibt es die rot glühende Meistermünze.</li>'
     + '<li><b>Rot und Grün:</b> Offene Gewohnheiten haben einen roten Rand, erledigte einen grünen. Keine Farbwahl mehr.</li>'
     + '<li><b>Nach Themen sortiert:</b> Morgens, Körper, Kopf, Mut & Kontakte, Selbstkontrolle, Abends. Erledigtes bleibt an seinem Platz. Das Thema änderst du, wenn du eine Gewohnheit antippst.</li>'
     + '<li><b>Heute neu sortiert:</b> Gewohnheiten ganz oben, Erledigtes rutscht nach unten.</li>'

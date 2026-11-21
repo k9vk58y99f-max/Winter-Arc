@@ -465,14 +465,14 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.9.0';
+const VERSION = '3.9.1';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
 const COLORS = ['#ffffff','#9aa3ad','#5f7f99','#c2312b','#f2c879','#7d8f7a','#6b6f78','#b9c6d3'];
 const WD_SHORT = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 const MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-const SUGGEST = ['Um 6 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt aus dem Haus','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Hausaufgaben','Lernen','Kein Alkohol','Selbstkontrolle','Clean geblieben','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
+const SUGGEST = ['Um 6 Uhr aufstehen','Training','2 Liter Wasser','10 Seiten lesen','Kalt duschen','Kein Zucker','10.000 Schritte','Bett machen','Gepflegt & gut angezogen','Jemanden Neues ansprechen','Rausgehen statt zocken','Aufgaben-Liste abarbeiten','Hausaufgaben','Lernen','Kein Alkohol','Selbstkontrolle','Clean geblieben','Kein Fast Food','Tagebuch schreiben','Kein Handy nach 22 Uhr','Meditieren'];
 const QUOTES = [
   'Disziplin schlägt Motivation. Jeden Tag.',
   'Während sie schlafen, arbeitest du.',
@@ -495,7 +495,7 @@ const QUOTES = [
 let state = load();
 function normalize(s){
   if(!s || !Array.isArray(s.habits)) return null;
-  const REN = { 'Vor 7 Uhr aufstehen':'Um 6 Uhr aufstehen', 'Vor 7 Uhr aufstehen.':'Um 6 Uhr aufstehen.', 'Kein Porno':'Selbstkontrolle', 'Kein Porno, kein Wichsen':'Selbstkontrolle', 'Frei von Pornos':'Selbstkontrolle' };
+  const REN = { 'Vor 7 Uhr aufstehen':'Um 6 Uhr aufstehen', 'Vor 7 Uhr aufstehen.':'Um 6 Uhr aufstehen.', 'Kein Porno':'Selbstkontrolle', 'Kein Porno, kein Wichsen':'Selbstkontrolle', 'Frei von Pornos':'Selbstkontrolle', 'Gepflegt aus dem Haus':'Gepflegt & gut angezogen' };
   const ren = n => REN[n] || n;
   if(Array.isArray(s.counters)) s.counters = s.counters.map(c => c && c.name ? Object.assign({}, c, { name:ren(c.name) }) : c);
   if(Array.isArray(s.goals)) s.goals = s.goals.map(g => g && g.title ? Object.assign({}, g, { title:ren(g.title), steps:Array.isArray(g.steps) ? g.steps.map(x => x && /^Pornoseiten sperren/.test(x.text) ? Object.assign({}, x, { text:x.text.replace(/^Pornoseiten sperren/, 'Websites für Erwachsene sperren') }) : x) : g.steps }) : g);
@@ -692,7 +692,7 @@ function streakText(h){
 // Themen in der Reihenfolge des Tages
 const CATS = [['morgen','Morgens'],['koerper','Körper'],['kopf','Kopf'],['mut','Mut & Kontakte'],['kontrolle','Selbstkontrolle'],['abend','Abends'],['sonst','Sonstiges']];
 const CAT_GUESS = [
-  ['morgen', /aufstehen|bett machen|kalt dusch|gepflegt|morgen|wecker/i],
+  ['morgen', /aufstehen|bett machen|kalt dusch|gepflegt|angezogen|morgen|wecker/i],
   ['abend', /22 uhr|abend|schlafen|handy nach|bildschirm/i],
   ['kontrolle', /selbstkontrolle|clean|kein |keine |nicht rauchen|verzicht|ohne /i],
   ['mut', /ansprechen|rausgehen|kontakt|anrufen|freund|date|sozial|leute|zocken/i],
@@ -1148,7 +1148,7 @@ function todoAdd(){
 const GOAL_TEMPLATES = [
   { title:'Eine Freundin finden', why:'Ich will jemanden an meiner Seite – und dafür der beste Mann werden, der ich sein kann.',
     steps:['Frisur und Bart auf Vordermann bringen','Zwei Outfits kaufen, die richtig gut sitzen','Einem Verein, Kurs oder einer Sportgruppe beitreten','Jede Woche mit mindestens einer neuen Person ins Gespräch kommen','Dating-Profil mit guten, echten Fotos erstellen','Eine Frau nach ihrer Nummer fragen','Erstes Date ausmachen'],
-    habits:[['Jemanden Neues ansprechen',{ mode:'times', times:3 }],['Gepflegt aus dem Haus',null],['Rausgehen statt zocken',{ mode:'times', times:3 }],['Training',{ mode:'times', times:4 }]] },
+    habits:[['Jemanden Neues ansprechen',{ mode:'times', times:3 }],['Gepflegt & gut angezogen',null],['Rausgehen statt zocken',{ mode:'times', times:3 }],['Training',{ mode:'times', times:4 }]] },
   { title:'In Form kommen', why:'Ich will im Frühling stärker und fitter sein als je zuvor.',
     steps:['Startgewicht und Maße aufschreiben','Trainingsplan festlegen','Ernährung planen: genug Eiweiß, wenig Zucker','Vier Wochen ohne Trainingsausfall','Fortschrittsfoto nach 30 Tagen'],
     habits:[['Training',{ mode:'times', times:4 }],['10.000 Schritte',null],['Kein Zucker',null]] },

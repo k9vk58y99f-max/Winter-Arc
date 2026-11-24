@@ -466,7 +466,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.11.0';
+const VERSION = '3.12.0';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
@@ -1062,6 +1062,7 @@ function openSettings(){
     + '<button class="btn ghost wide" style="margin-top:8px" data-act="snaps">Ältere Kopie wiederherstellen</button>'
     + '<p class="note" style="margin:8px 0 0">Tipp: „Sicherung speichern“ → „In Dateien sichern“ → iCloud Drive. Dann ist sie auch sicher, wenn das Handy weg ist.</p></div>'
     + '<div class="field"><label>App-Version</label><p class="note" style="margin:0 0 8px">Du hast Version ' + VERSION + '. Neue Versionen meldet die App von selbst.</p><button class="btn ghost wide" data-act="check-update">Nach Update suchen</button></div>'
+    + '<div class="field"><label>Komplett neu anfangen</label><button class="btn danger wide" data-act="wipe">Alles zurücksetzen</button><p class="note" style="margin:6px 0 0">Löscht alles – Haken, Serien, Abzeichen, Ziele, Regeln, Zähler, Abend-Checks. Du wählst vorher, welche Gewohnheiten bleiben.</p></div>'
     + (a ? '<div class="field"><label>Neu anfangen</label><button class="btn danger wide" data-act="new-arc">Bei Tag 1 neu beginnen</button><p class="note" style="margin:6px 0 0">Nur der Tag-Zähler beginnt wieder bei 1. Gewohnheiten, Haken, Ziele, Zähler und Abzeichen bleiben.</p></div>' : '')
     + '<div class="row-btns" style="margin-top:18px"><button class="btn" data-act="cancel">Fertig</button></div>');
   if($('#s-why')) $('#s-why').oninput = e => { state.arc.why = e.target.value.slice(0,160); save(); render(); };
@@ -1638,6 +1639,34 @@ function focusSave(){
   state.focus = [...fpick]; fpick = null; save(); closeSheet(); tab = 'today'; render(); toast('Fokus gesetzt. ' + state.focus.length + ' Sachen. Jeden Tag.');
 }
 
+/* ---------- Komplett zurücksetzen ---------- */
+let wkeep = null;
+function wipeOpen(){
+  const all = state.habits.filter(h => !h.archived);
+  if(wkeep === null) wkeep = new Set(focusOn() ? state.focus : []);
+  openSheet('<h3>Alles zurücksetzen</h3><p class="note" style="margin:-6px 0 14px">Welche Gewohnheiten sollen bleiben? Alles andere wird gelöscht. Auch die behaltenen starten wieder bei null.</p>'
+    + '<div class="chips" id="wp-list">' + all.map(h => '<button data-id="' + h.id + '" class="' + (wkeep.has(h.id) ? 'on' : '') + '">' + esc(h.name) + '</button>').join('') + '</div>'
+    + '<p class="note" id="wp-cnt" style="margin:12px 0 0">' + wkeep.size + ' bleiben</p>'
+    + '<div class="row-btns" style="margin-top:14px"><button class="btn" data-act="wipe-cancel">Abbrechen</button><button class="btn danger" data-act="wipe-2">Weiter</button></div>');
+  $('#wp-list').onclick = e => { const b = e.target.closest('button'); if(!b) return; const id = b.dataset.id;
+    wkeep.has(id) ? wkeep.delete(id) : wkeep.add(id); b.classList.toggle('on'); $('#wp-cnt').textContent = wkeep.size + ' bleiben'; };
+}
+function wipe2(){
+  const names = state.habits.filter(h => wkeep.has(h.id)).map(h => h.name);
+  openSheet('<h3>Wirklich alles löschen?</h3><p>Alle Haken, Serien, Abzeichen, Ziele, Regeln, Aufgaben, Zähler und Abend-Checks werden gelöscht. Du startest wieder bei Tag 1.</p>'
+    + '<p class="note">Bleiben: ' + (names.length ? names.map(esc).join(', ') : 'keine Gewohnheiten') + '</p>'
+    + '<div class="row-btns"><button class="btn" data-act="wipe-cancel">Abbrechen</button><button class="btn danger" data-act="wipe-ok">Ja, alles löschen</button></div>');
+}
+function wipeOk(){
+  const t = dkey(today());
+  const keep = state.habits.filter(h => wkeep.has(h.id)).map(h => Object.assign({}, h, { created:t, archived:false }));
+  const n = EMPTY();
+  Object.assign(n, { habits:keep, weekStart:state.weekStart, snow:state.snow, remind:state.remind, mutOn:state.mutOn, lastBackup:state.lastBackup, rev:(state.rev || 0) + 1 });
+  state = n; wkeep = null;
+  try{ localStorage.removeItem('winterarc_mutreset1'); localStorage.setItem('winterarc_mutreset1', '1'); }catch(e){}
+  save(); closeSheet(); tab = 'today'; viewDay = today(); window.scrollTo(0, 0); render(); toast('Alles zurückgesetzt. Neuer Start.');
+}
+
 /* ---------- Speicher-Warnungen ---------- */
 function storageWarnHtml(){
   let h = '';
@@ -1772,6 +1801,10 @@ document.addEventListener('click', e => {
   else if(act === 'story') storyOpen();
   else if(act === 'focus'){ fpick = null; focusOpen(); }
   else if(act === 'focus-save') focusSave();
+  else if(act === 'wipe'){ wkeep = null; wipeOpen(); }
+  else if(act === 'wipe-2') wipe2();
+  else if(act === 'wipe-ok') wipeOk();
+  else if(act === 'wipe-cancel'){ wkeep = null; closeSheet(); }
   else if(act === 'focus-cancel'){ fpick = null; closeSheet(); }
   else if(act === 'focus-off'){ state.focus = null; fpick = null; save(); closeSheet(); render(); toast('Alle Gewohnheiten wieder aktiv.'); }
   else if(act === 'cloud-new') cloudNew();

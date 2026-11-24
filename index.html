@@ -429,6 +429,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 .coin.big.master{ filter:drop-shadow(0 0 50px rgba(224,53,45,.8)); }
 .rule-i.wl::before, .rule-i[style*="counter-increment:none"]::before{ content:none; }
 .mood{ background-position:center 35% !important; }
+.focus-note{ display:block; width:100%; margin-top:10px; padding:10px; border:1px dashed rgba(255,255,255,.25); border-radius:var(--r); color:var(--dim); font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
 </style>
 </head>
 <body>
@@ -465,7 +466,7 @@ nav.bar button.on svg{ filter:drop-shadow(0 0 6px var(--red-glow)); color:#ff5a5
 
 <script>
 'use strict';
-const VERSION = '3.10.0';
+const VERSION = '3.11.0';
 // Cloud (eigenes Supabase-Projekt nur für Winter Arc). Öffentliche Werte – kein Geheimnis. Leer = Cloud aus.
 const CLOUD = { url:'', key:'' };
 const KEY = 'winterarc_v1';
@@ -503,10 +504,11 @@ function normalize(s){
   if(Array.isArray(s.rules)) s.rules = s.rules.map(ren);
   return { arc:s.arc || null, badges:Array.isArray(s.badges) ? s.badges : null, habits:s.habits, marks:s.marks || {}, weekStart: s.weekStart === 0 ? 0 : 1, snow: s.snow !== false,
     todos:Array.isArray(s.todos) ? s.todos : [], goals:Array.isArray(s.goals) ? s.goals : [], rules:Array.isArray(s.rules) ? s.rules : [],
+    focus:Array.isArray(s.focus) && s.focus.length ? s.focus.map(String) : null,
     counters:Array.isArray(s.counters) ? s.counters : [], checkins:(s.checkins && typeof s.checkins === 'object') ? s.checkins : {}, urgeWins:Array.isArray(s.urgeWins) ? s.urgeWins : [],
     mut:(s.mut && typeof s.mut === 'object') ? s.mut : { level:1, done:{} }, mutOn:s.mutOn !== false, remind:s.remind || { am:'06:00', pm:'21:00' }, lastBackup:s.lastBackup || null, rev:+s.rev || 0, savedAt:s.savedAt || null };
 }
-function EMPTY(){ return { checkins:{}, urgeWins:[], mut:{ level:1, done:{} }, mutOn:true, remind:{ am:'06:00', pm:'21:00' }, arc:null, badges:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[], counters:[], lastBackup:null, rev:0, savedAt:null }; }
+function EMPTY(){ return { focus:null, checkins:{}, urgeWins:[], mut:{ level:1, done:{} }, mutOn:true, remind:{ am:'06:00', pm:'21:00' }, arc:null, badges:null, habits:[], marks:{}, weekStart:1, snow:true, todos:[], goals:[], rules:[], counters:[], lastBackup:null, rev:0, savedAt:null }; }
 function loadLS(){ try{ return normalize(JSON.parse(localStorage.getItem(KEY) || 'null')); }catch(e){ return null; } }
 function load(){ return loadLS() || EMPTY(); }
 const hasData = s => !!(s && (s.arc || s.habits.length || s.goals.length || s.todos.length || s.counters.length || s.rules.length));
@@ -702,9 +704,12 @@ const CAT_GUESS = [
 const guessCat = n => { for(const [c, re] of CAT_GUESS) if(re.test(n || '')) return c; return 'sonst'; };
 const catOf = h => (h.cat && CATS.some(c => c[0] === h.cat)) ? h.cat : guessCat(h.name);
 const catIdx = h => CATS.findIndex(c => c[0] === catOf(h));
-const activeHabits = () => state.habits.map((h, i) => [h, i]).filter(([h]) => !h.archived).sort((a, b) => catIdx(a[0]) - catIdx(b[0]) || a[1] - b[1]).map(x => x[0]);
+const focusOn = () => !!(state.focus && state.focus.length && state.habits.some(h => state.focus.includes(h.id)));
+const activeHabits = () => state.habits.map((h, i) => [h, i]).filter(([h]) => !h.archived && (!focusOn() || state.focus.includes(h.id))).sort((a, b) => catIdx(a[0]) - catIdx(b[0]) || a[1] - b[1]).map(x => x[0]);
 function addHabit(name, extra){
-  state.habits.push(Object.assign({ id:uid(), name, color:COLORS[state.habits.length % COLORS.length], mode:'daily', days:[1,2,3,4,5], times:3, created:dkey(today()) }, extra || {}));
+  const id = (extra && extra.id) || uid();
+  if(focusOn()) state.focus.push(id);
+  state.habits.push(Object.assign({ id, id:uid(), name, color:COLORS[state.habits.length % COLORS.length], mode:'daily', days:[1,2,3,4,5], times:3, created:dkey(today()) }, extra || {}));
 }
 
 /* ---------- Ansicht ---------- */
@@ -846,7 +851,8 @@ function renderToday(){
   const hs = activeHabits();
   const t = today(), k = dkey(viewDay), isToday = k === dkey(t);
   const label = isToday ? 'Heute' : (k === dkey(addDays(t,-1)) ? 'Gestern' : longDate(viewDay));
-  let html = (isToday ? storageWarnHtml() + '<button class="sos-big" data-act="sos">Notfallplan</button>' : '') + arcCardHtml(true);
+  let html = (isToday ? storageWarnHtml() + '<button class="sos-big" data-act="sos">Notfallplan</button>' : '') + arcCardHtml(true)
+    + (focusOn() ? '<button class="focus-note" data-act="focus">Fokus: ' + activeHabits().length + ' von ' + state.habits.filter(h => !h.archived).length + ' Gewohnheiten · ändern</button>' : '');
   html += '<div class="daynav"><button class="icon-btn" data-act="prev" aria-label="Vorheriger Tag">' + ARROW_L + '</button>'
     + '<div class="lbl"><b>' + label + '</b><span>' + (isToday ? longDate(viewDay) : 'Nachtragen') + '</span></div>'
     + '<button class="icon-btn" data-act="next" aria-label="Nächster Tag"' + (isToday ? ' disabled' : '') + '>' + ARROW_R + '</button></div>';
@@ -1030,6 +1036,7 @@ function deleteHabit(){
 function deleteConfirmed(){
   const id = draft.id;
   state.habits = state.habits.filter(x => x.id !== id);
+  if(state.focus) state.focus = state.focus.filter(x => x !== id);
   for(const k in state.marks){ state.marks[k] = state.marks[k].filter(x => x !== id); if(!state.marks[k].length) delete state.marks[k]; }
   save(); closeSheet(); render(); toast('Gelöscht.');
 }
@@ -1045,6 +1052,8 @@ function openSettings(){
       + '<div class="remind"><input id="r-pm" type="time" value="' + state.remind.pm + '"><button class="btn ghost" data-act="remind-pm">Abends eintragen</button></div></div>'
     + '<div class="field"><label>Mut-Challenge · Stufe ' + (state.mut.level || 1) + '</label><button class="mini-btn" style="margin:-4px 0 8px" data-act="mut-reset">Auf Stufe 1 zurücksetzen</button><div class="seg" id="s-mut"><button data-v="1" class="' + (state.mutOn ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.mutOn ? 'on' : '') + '">Aus</button></div></div>'
     + '<div class="field"><label>Schneefall</label><div class="seg" id="s-snow"><button data-v="1" class="' + (state.snow ? 'on' : '') + '">An</button><button data-v="0" class="' + (!state.snow ? 'on' : '') + '">Aus</button></div></div>'
+    + '<div class="field"><label>Fokus-Modus</label><p class="note" style="margin:0 0 8px">' + (focusOn() ? 'An: ' + activeHabits().length + ' von ' + state.habits.filter(h => !h.archived).length + ' Gewohnheiten aktiv. Die anderen sind pausiert – nichts geht verloren.' : 'Konzentrier dich auf wenige Gewohnheiten. Die anderen werden nur pausiert.') + '</p>'
+      + '<button class="btn ghost wide" data-act="focus">' + (focusOn() ? 'Fokus ändern' : 'Fokus wählen') + '</button></div>'
     + cloudSettingsHtml()
     + '<div class="field"><label>Speicher</label><p class="note" style="margin:0 0 8px">Alles wird sofort doppelt auf diesem Gerät gespeichert, dazu jeden Tag eine Kopie (14 Tage).<br>'
       + (state.savedAt ? 'Zuletzt gespeichert: ' + new Date(state.savedAt).toLocaleString('de-DE', { dateStyle:'short', timeStyle:'short' }) + '<br>' : '')
@@ -1610,6 +1619,25 @@ async function cloudRestoreGo(){
   }catch(e){ toast('Wiederherstellen hat nicht geklappt. Code prüfen oder später nochmal.'); }
 }
 
+/* ---------- Fokus-Modus ---------- */
+let fpick = null;
+function focusOpen(){
+  const all = state.habits.filter(h => !h.archived).map((h, i) => [h, i]).sort((a, b) => catIdx(a[0]) - catIdx(b[0]) || a[1] - b[1]).map(x => x[0]);
+  if(fpick === null) fpick = new Set(focusOn() ? state.focus : []);
+  openSheet('<h3>Fokus</h3><p class="note" style="margin:-6px 0 14px">Wähl die Gewohnheiten, auf die du dich jetzt konzentrierst – am besten 3. Die anderen werden pausiert: Haken und Serien bleiben gespeichert, du holst sie jederzeit zurück.</p>'
+    + '<div class="chips" id="fo-list">' + all.map(h => '<button data-id="' + h.id + '" class="' + (fpick.has(h.id) ? 'on' : '') + '">' + esc(h.name) + '</button>').join('') + '</div>'
+    + '<p class="note" id="fo-cnt" style="margin:12px 0 0">' + fpick.size + ' ausgewählt</p>'
+    + '<div class="row-btns" style="margin-top:14px"><button class="btn ghost" data-act="focus-cancel">Abbrechen</button><button class="btn" data-act="focus-save">Speichern</button></div>'
+    + (focusOn() ? '<div class="small-btns"><button class="btn ghost" data-act="focus-off">Fokus beenden – alle zeigen</button></div>' : ''));
+  $('#fo-list').onclick = e => { const b = e.target.closest('button'); if(!b) return; const id = b.dataset.id;
+    fpick.has(id) ? fpick.delete(id) : fpick.add(id); b.classList.toggle('on');
+    const n = fpick.size; $('#fo-cnt').textContent = n + ' ausgewählt' + (n > 3 ? ' – mehr als 3 macht es schwerer' : ''); };
+}
+function focusSave(){
+  if(!fpick || !fpick.size){ toast('Wähl mindestens eine Gewohnheit.'); return; }
+  state.focus = [...fpick]; fpick = null; save(); closeSheet(); tab = 'today'; render(); toast('Fokus gesetzt. ' + state.focus.length + ' Sachen. Jeden Tag.');
+}
+
 /* ---------- Speicher-Warnungen ---------- */
 function storageWarnHtml(){
   let h = '';
@@ -1649,6 +1677,7 @@ function whatsNew(){
   let seen = null; try{ seen = localStorage.getItem('winterarc_seen_ver'); localStorage.setItem('winterarc_seen_ver', VERSION); }catch(e){}
   if(!seen || seen === VERSION || !state.arc) return;
   openSheet('<h3>Neu in ' + VERSION + '</h3><ul class="news">'
+    + '<li><b>Fokus-Modus:</b> Wähl 3 Gewohnheiten, auf die du dich konzentrierst. Die anderen werden pausiert – nichts geht verloren. Zu finden in den Einstellungen.</li>'
     + '<li><b>Mo–Fr und Wochenende:</b> Gewohnheiten nur an Werktagen (z. B. Hausaufgaben) oder nur am Wochenende. An freien Tagen stehen sie unter „Heute frei“ und zählen nicht gegen deinen perfekten Tag.</li>'
     + '<li><b>Neue Bilder:</b> dein Wolf in fünf Stufen – vom Welpen bis zur Legende mit Rudel – und geschmiedete Münzen für die Abzeichen. Ab 100 Tagen gibt es die rot glühende Meistermünze.</li>'
     + '<li><b>Rot und Grün:</b> Offene Gewohnheiten haben einen roten Rand, erledigte einen grünen. Keine Farbwahl mehr.</li>'
@@ -1741,6 +1770,10 @@ document.addEventListener('click', e => {
   else if(act === 'remind-am') remindAdd('am');
   else if(act === 'remind-pm') remindAdd('pm');
   else if(act === 'story') storyOpen();
+  else if(act === 'focus'){ fpick = null; focusOpen(); }
+  else if(act === 'focus-save') focusSave();
+  else if(act === 'focus-cancel'){ fpick = null; closeSheet(); }
+  else if(act === 'focus-off'){ state.focus = null; fpick = null; save(); closeSheet(); render(); toast('Alle Gewohnheiten wieder aktiv.'); }
   else if(act === 'cloud-new') cloudNew();
   else if(act === 'cloud-restore') cloudRestoreOpen();
   else if(act === 'cloud-restore-go') cloudRestoreGo();
